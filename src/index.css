@@ -1,0 +1,31 @@
+:root {
+  color-scheme: dark;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #eef7ff;
+  background: #030d18;
+  min-height: 100vh;
+  animation: bodyFade 440ms ease-out;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@keyframes bodyFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
