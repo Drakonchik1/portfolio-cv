@@ -1,6 +1,9 @@
 :root {
   color-scheme: dark;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --card-season-bg: rgba(8, 26, 46, 0.72);
+  --season-glow-inner: rgba(160, 215, 255, 0.28);
+  --season-glow-outer: rgba(200, 235, 255, 0.14);
 }
 
 *,
@@ -15,6 +18,7 @@ body {
   background: #030d18;
   min-height: 100vh;
   animation: bodyFade 440ms ease-out;
+  transition: background-color 0.85s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 #root {
@@ -27,5 +31,11 @@ body {
   }
   to {
     opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition-duration: 0.01ms !important;
   }
 }

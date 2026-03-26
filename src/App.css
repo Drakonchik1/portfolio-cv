@@ -11,6 +11,10 @@
   width: 100%;
 }
 
+.mtn-band svg path {
+  transition: fill 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
 .mtn-band-top {
   height: 380px;
   margin-bottom: -1px;
@@ -83,11 +87,19 @@
 }
 
 
-.snow-field {
+/* Wraps canvas so each season change can ease in */
+.particle-season-wrap {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
+  animation: seasonLayerFadeIn 0.55s ease forwards;
+}
+
+.snow-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
 .side-snowflakes {
@@ -97,14 +109,209 @@
   z-index: 0;
 }
 
+.side-snowflakes.season-deco-enter {
+  animation: seasonDecoEnter 0.65s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+
+@keyframes seasonLayerFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes seasonDecoEnter {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
 .side-flake {
   position: absolute;
+  pointer-events: none;
+}
+
+.side-flake-inner {
+  position: absolute;
+  left: 0;
+  top: 0;
   transition: transform 200ms ease-out;
-  filter: drop-shadow(0 0 5px rgba(200, 235, 255, 0.45));
+  transform-origin: center center;
+}
+
+.side-flake-spin {
+  animation: sideDecoSpin linear infinite;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes sideDecoSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Full-viewport slow rings — sit behind content */
+.ambient-rotors {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ambient-rotor-anchor {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ambient-rotor-ring {
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 228, 255, 0.11);
+  box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.04);
+  animation: ambientRotorSpin linear infinite;
+  opacity: 0.55;
+}
+
+.ambient-rotor-ring--dashed {
+  border-style: dashed;
+  opacity: 0.42;
+}
+
+@keyframes ambientRotorSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Corner / brand decorations on cards */
+.section-with-rotors,
+.hero-with-rotors {
+  overflow: hidden;
+}
+
+.card-rotor {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 230, 255, 0.16);
+  animation: cardRotorSpin linear infinite;
+  opacity: 0.35;
+  z-index: 0;
+}
+
+.card-rotor--tl {
+  width: 44px;
+  height: 44px;
+  top: 0.65rem;
+  left: 0.65rem;
+  animation-duration: 28s;
+}
+
+.card-rotor--br {
+  width: 52px;
+  height: 52px;
+  bottom: 0.55rem;
+  right: 0.55rem;
+  animation-duration: 36s;
+  animation-direction: reverse;
+}
+
+.card-rotor--tr {
+  width: 38px;
+  height: 38px;
+  top: 0.55rem;
+  right: 0.55rem;
+  animation-duration: 32s;
+}
+
+.card-rotor--bl {
+  width: 42px;
+  height: 42px;
+  bottom: 0.5rem;
+  left: 0.55rem;
+  animation-duration: 40s;
+  animation-direction: reverse;
+}
+
+.card-rotor--tr-small {
+  width: 30px;
+  height: 30px;
+  top: 0.45rem;
+  right: 0.45rem;
+  animation-duration: 24s;
+}
+
+.card-rotor--br-small {
+  width: 34px;
+  height: 34px;
+  bottom: 0.4rem;
+  right: 0.4rem;
+  animation-duration: 30s;
+  animation-direction: reverse;
+}
+
+@keyframes cardRotorSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: #f1f8ff;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.brand-rotor {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px dashed rgba(200, 230, 255, 0.35);
+  animation: brandRotorSpin 14s linear infinite;
+  opacity: 0.75;
+}
+
+@keyframes brandRotorSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 700px) {
-  .side-flake { display: none; }
+  .side-flake {
+    display: none;
+  }
+
+  .ambient-rotors {
+    display: none;
+  }
+
+  .card-rotor {
+    display: none;
+  }
+
+  .brand-rotor {
+    display: none;
+  }
 }
 
 .bg-glow {
@@ -120,13 +327,23 @@
 .bg-glow-left {
   left: -150px;
   top: -120px;
-  background: radial-gradient(circle, rgba(122, 201, 255, 0.26) 0%, rgba(122, 201, 255, 0) 72%);
+  background: radial-gradient(
+    circle,
+    var(--season-glow-inner, rgba(122, 201, 255, 0.26)) 0%,
+    transparent 72%
+  );
+  transition: background 0.85s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .bg-glow-right {
   right: -170px;
   top: 120px;
-  background: radial-gradient(circle, rgba(180, 226, 255, 0.24) 0%, rgba(180, 226, 255, 0) 72%);
+  background: radial-gradient(
+    circle,
+    var(--season-glow-outer, rgba(180, 226, 255, 0.22)) 0%,
+    transparent 72%
+  );
+  transition: background 0.85s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .card {
@@ -138,21 +355,16 @@
   padding: 1.15rem;
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(16px);
-  transition: background 600ms ease;
+  transition:
+    background 0.8s cubic-bezier(0.33, 1, 0.68, 1),
+    border-color 0.55s ease,
+    box-shadow 0.55s ease;
 }
 
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.brand {
-  margin: 0;
-  color: #f1f8ff;
-  font-size: 1rem;
-  letter-spacing: 0.04em;
-  font-weight: 700;
 }
 
 .top-links {
@@ -653,3 +865,30 @@
   gap: 0.4rem;
 }
 .highlight-list li { font-size: 0.88rem; opacity: 0.82; line-height: 1.4; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mtn-band svg path,
+  .card,
+  .bg-glow-left,
+  .bg-glow-right {
+    transition: none !important;
+  }
+
+  .particle-season-wrap {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .side-snowflakes.season-deco-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  .side-flake-spin,
+  .ambient-rotor-ring,
+  .card-rotor,
+  .brand-rotor {
+    animation: none !important;
+  }
+}

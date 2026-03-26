@@ -1,5 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  lazy,
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import './App.css'
+
+const ProjectModal = lazy(() => import('./ProjectModal.jsx'))
 
 // ─── Season System ────────────────────────────────────────────────────────────
 const SEASON_CONFIG = {
@@ -9,6 +21,8 @@ const SEASON_CONFIG = {
     mtnColors: ['#1c4068', '#0e2a42', '#071c2e', '#030d18'],
     cardBg: 'rgba(8, 26, 46, 0.72)',
     sideGlow: 'rgba(200,235,255,0.45)',
+    glowInner: 'rgba(160, 215, 255, 0.28)',
+    glowOuter: 'rgba(200, 235, 255, 0.14)',
   },
   spring: {
     label: 'Spring', icon: '🌸',
@@ -16,20 +30,28 @@ const SEASON_CONFIG = {
     mtnColors: ['#1a4820', '#0e2e14', '#071a09', '#060f08'],
     cardBg: 'rgba(8, 26, 12, 0.72)',
     sideGlow: 'rgba(180,240,160,0.4)',
+    glowInner: 'rgba(120, 210, 140, 0.22)',
+    glowOuter: 'rgba(170, 235, 160, 0.12)',
   },
   summer: {
-    label: 'Summer', icon: '🌋',
-    bodyBg: '#0e0502',
-    mtnColors: ['#6b1e06', '#3d0e03', '#1e0701', '#0e0502'],
-    cardBg: 'rgba(40, 12, 4, 0.75)',
-    sideGlow: 'rgba(255,100,25,0.55)',
+    label: 'Summer', icon: '🌻',
+    // Dusk over water: cool teal mountains, warm air — reads clearly different from autumn earth tones
+    bodyBg: '#030f14',
+    mtnColors: ['#1a6b7a', '#0f4a58', '#082e38', '#030f14'],
+    cardBg: 'rgba(6, 38, 48, 0.78)',
+    sideGlow: 'rgba(255, 214, 130, 0.38)',
+    glowInner: 'rgba(90, 200, 210, 0.22)',
+    glowOuter: 'rgba(255, 210, 130, 0.16)',
   },
   autumn: {
     label: 'Autumn', icon: '🍂',
-    bodyBg: '#0f0804',
-    mtnColors: ['#5a2a10', '#381808', '#1e0d04', '#0f0804'],
-    cardBg: 'rgba(30, 14, 6, 0.72)',
-    sideGlow: 'rgba(230,110,30,0.4)',
+    // Rust, bark, wet soil — no shared red-brown band with old “volcanic” summer
+    bodyBg: '#0a0504',
+    mtnColors: ['#4a2c22', '#2e1a14', '#1a0f0c', '#0a0504'],
+    cardBg: 'rgba(32, 18, 12, 0.76)',
+    sideGlow: 'rgba(200, 95, 45, 0.36)',
+    glowInner: 'rgba(210, 110, 60, 0.2)',
+    glowOuter: 'rgba(160, 70, 45, 0.12)',
   },
 }
 const SEASON_ORDER = ['winter', 'spring', 'summer', 'autumn']
@@ -296,14 +318,14 @@ function SunflowerSVG({ size }) {
         return (
           <ellipse key={i} cx={px} cy={py} rx="7" ry="17"
             transform={`rotate(${deg},${px},${py})`}
-            fill="rgba(255,85,18,0.92)" stroke="rgba(200,50,10,0.5)" strokeWidth="0.7"/>
+            fill="rgba(255,205,72,0.9)" stroke="rgba(200,140,28,0.5)" strokeWidth="0.7"/>
         )
       })}
-      <circle cx={cx} cy={cy} r="13" fill="rgba(160,28,8,0.92)" stroke="rgba(120,18,4,0.55)" strokeWidth="0.8"/>
+      <circle cx={cx} cy={cy} r="13" fill="rgba(42,28,12,0.92)" stroke="rgba(24,16,6,0.55)" strokeWidth="0.8"/>
       {Array.from({ length: 8 }, (_, i) => {
         const a = (i * 45 - 90) * Math.PI / 180
         return <circle key={i} cx={cx + 8*Math.cos(a)} cy={cy + 8*Math.sin(a)} r="1.5"
-          fill="rgba(255,140,40,0.75)"/>
+          fill="rgba(255,228,140,0.78)"/>
       })}
     </svg>
   )
@@ -312,9 +334,9 @@ function SunflowerSVG({ size }) {
 // Autumn: maple leaf
 // 3 colour variants: 0=orange, 1=red-orange, 2=golden-yellow
 const LEAF_PALETTES = [
-  { fill: 'rgba(235,105,18,0.92)', stroke: 'rgba(185,75,10,0.55)', vein: 'rgba(185,75,10,0.45)' },
-  { fill: 'rgba(200,55,20,0.92)',  stroke: 'rgba(155,38,12,0.55)', vein: 'rgba(155,38,12,0.45)' },
-  { fill: 'rgba(238,155,18,0.92)', stroke: 'rgba(190,118,10,0.55)', vein: 'rgba(190,118,10,0.45)' },
+  { fill: 'rgba(175,82,38,0.92)', stroke: 'rgba(110,48,22,0.55)', vein: 'rgba(90,42,20,0.45)' },
+  { fill: 'rgba(132,48,52,0.92)', stroke: 'rgba(85,28,32,0.55)', vein: 'rgba(70,24,28,0.45)' },
+  { fill: 'rgba(168,118,42,0.92)', stroke: 'rgba(105,78,28,0.55)', vein: 'rgba(88,62,22,0.45)' },
 ]
 
 function MapleLeafSVG({ size, variant = 0 }) {
@@ -375,20 +397,20 @@ function lcg(seed) {
 
 // Season placement config — used inside SideDecorations via useMemo
 const SEASON_PLACEMENT = {
-  winter: { count: 90, minSz: 14, maxSz: 52, gap: 1.2,
+  winter: { count: 135, minSz: 14, maxSz: 52, gap: 1.2,
     genX: (rng, W) => rng() * W,
     genY: (rng, H) => rng() * H,
   },
-  spring: { count: 110, minSz: 12, maxSz: 40, gap: 1.0,
+  spring: { count: 165, minSz: 12, maxSz: 40, gap: 1.0,
     // x: full canvas — flowers appear everywhere, not just at edges
     genX: (rng, W) => rng() * W,
     genY: (rng, H) => H * (0.04 + Math.pow(rng(), 0.6) * 0.92),
   },
-  summer: { count: 88, minSz: 20, maxSz: 46, gap: 1.25,
+  summer: { count: 128, minSz: 20, maxSz: 46, gap: 1.25,
     genX: (rng, W) => rng() * W,
     genY: (rng, H) => rng() * H * 0.96 + H * 0.02,
   },
-  autumn: { count: 90, minSz: 12, maxSz: 48, gap: 1.0,
+  autumn: { count: 135, minSz: 12, maxSz: 48, gap: 1.0,
     genX: (rng, W) => rng() * W,
     genY: (rng, H) => {
       const r = rng()
@@ -397,24 +419,67 @@ const SEASON_PLACEMENT = {
   },
 }
 
+const AMBIENT_ROT_SEED = { winter: 0xa11b001, spring: 0xa11b002, summer: 0xa11b003, autumn: 0xa11b004 }
+
+function AmbientRotorsInner({ season }) {
+  const items = useMemo(() => {
+    const rng = lcg(AMBIENT_ROT_SEED[season])
+    const n = 16
+    return Array.from({ length: n }, (_, i) => ({
+      id: `${season}-ar-${i}`,
+      topPct: 4 + rng() * 90,
+      leftPct: 2 + rng() * 96,
+      px: 20 + Math.floor(rng() * 58),
+      sec: 18 + rng() * 36,
+      rev: rng() > 0.47,
+      dashed: rng() > 0.52,
+    }))
+  }, [season])
+
+  return (
+    <div className="ambient-rotors" aria-hidden="true">
+      {items.map((r) => (
+        <div
+          key={r.id}
+          className="ambient-rotor-anchor"
+          style={{ top: `${r.topPct}%`, left: `${r.leftPct}%` }}
+        >
+          <div
+            className={`ambient-rotor-ring${r.dashed ? ' ambient-rotor-ring--dashed' : ''}`}
+            style={{
+              width: r.px,
+              height: r.px,
+              animationDuration: `${r.sec}s`,
+              animationDirection: r.rev ? 'reverse' : 'normal',
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const AmbientRotors = memo(AmbientRotorsInner)
+
 function ParticleField({ season }) {
+  const canvasRef = useRef(null)
   const rafRef = useRef(0)
 
   useEffect(() => {
-    const canvas = document.getElementById('particle-canvas')
+    const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { alpha: true })
 
     const particles = []
     // Autumn gets many more particles for a dense rain effect
-    const COUNT = season === 'autumn' ? 220 : 60
+    const COUNT = season === 'autumn' ? 280 : season === 'winter' ? 95 : 88
 
     const resize = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
       if (!particles.length) {
+        const isAutumn = season === 'autumn'
         for (let i = 0; i < COUNT; i++) {
-          const isAutumn = season === 'autumn'
           particles.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
@@ -431,98 +496,135 @@ function ParticleField({ season }) {
     }
 
     resize()
-    window.addEventListener('resize', resize)
+    window.addEventListener('resize', resize, { passive: true })
 
-    const drawParticle = (p, t) => {
-      ctx.save()
-      ctx.translate(p.x, p.y)
+    // Pick once per season — avoids branching inside the hot loop (hundreds of particles × 60fps)
+    const drawParticle =
+      season === 'winter'
+        ? (p, t) => {
+            ctx.save()
+            ctx.translate(p.x, p.y)
+            ctx.rotate(p.rot)
+            ctx.fillStyle = 'rgba(223,246,255,0.62)'
+            const d = p.size * 0.9
+            ctx.fillRect(-d * 0.5, -d * 0.5, d, d)
+            ctx.restore()
+          }
+        : season === 'spring'
+          ? (p, t) => {
+              ctx.save()
+              ctx.translate(p.x, p.y)
+              ctx.rotate(p.rot)
+              const g = Math.floor(150 + p.hue * 80)
+              ctx.fillStyle = `rgba(50,${g},40,0.72)`
+              ctx.beginPath()
+              ctx.ellipse(0, 0, p.size * 0.55, p.size * 2.2, 0, 0, Math.PI * 2)
+              ctx.fill()
+              ctx.strokeStyle = `rgba(30,${g - 30},20,0.45)`
+              ctx.lineWidth = 0.5
+              ctx.beginPath()
+              ctx.moveTo(0, -p.size * 2.2)
+              ctx.lineTo(0, p.size * 2.2)
+              ctx.stroke()
+              ctx.restore()
+            }
+          : season === 'summer'
+            ? (p, t) => {
+                ctx.save()
+                ctx.translate(p.x, p.y)
+                ctx.rotate(t * 0.00035 + p.phase)
+                const alpha = 0.28 + 0.42 * Math.abs(Math.sin(t * 0.002 + p.phase))
+                const r = p.size * 0.75
+                const g = Math.floor(210 + p.hue * 45)
+                const rd = Math.floor(230 + p.hue * 25)
+                ctx.shadowColor = 'rgba(255,248,200,0.75)'
+                ctx.shadowBlur = 9
+                ctx.fillStyle = `rgba(${rd},${g},90,${alpha})`
+                ctx.beginPath()
+                ctx.arc(0, 0, r, 0, Math.PI * 2)
+                ctx.fill()
+                ctx.shadowBlur = 0
+                ctx.restore()
+              }
+            : (p, t) => {
+                ctx.save()
+                ctx.translate(p.x, p.y)
+                ctx.rotate(p.rot * 0.08 + Math.sin(t * 0.0004 + p.phase) * 0.12)
+                const alpha = 0.18 + p.hue * 0.32
+                ctx.strokeStyle = `rgba(150,128,108,${alpha})`
+                ctx.lineWidth = p.size * 0.7
+                ctx.lineCap = 'round'
+                const len = p.size * 12
+                const slant = len * 0.18
+                ctx.beginPath()
+                ctx.moveTo(-slant * 0.5, -len * 0.5)
+                ctx.lineTo(slant * 0.5, len * 0.5)
+                ctx.stroke()
+                ctx.restore()
+              }
 
-      if (season === 'winter') {
-        ctx.fillStyle = 'rgba(223,246,255,0.62)'
-        ctx.beginPath()
-        ctx.arc(0, 0, p.size, 0, Math.PI * 2)
-        ctx.fill()
+    const updateParticle =
+      season === 'summer'
+        ? (p, t, cw, ch) => {
+            p.x += p.drift * 0.5 + Math.sin(t * 0.0007 + p.phase) * 0.45
+            p.y -= p.speed * 0.35 + Math.cos(t * 0.0009 + p.phase) * 0.25
+            if (p.y < -10) { p.y = ch + 10; p.x = Math.random() * cw }
+            if (p.y > ch + 10) p.y = -10
+            if (p.x < -10) p.x = cw + 10
+            if (p.x > cw + 10) p.x = -10
+          }
+        : (p, t, cw, ch) => {
+            p.y += p.speed
+            p.x += p.drift
+            p.rot += p.rotV
+            if (p.y > ch + 10) { p.y = -10; p.x = Math.random() * cw }
+            if (p.x < -10) p.x = cw + 10
+            if (p.x > cw + 10) p.x = -10
+          }
 
-      } else if (season === 'spring') {
-        // Small elongated leaf, rotated
-        ctx.rotate(p.rot)
-        const g = Math.floor(150 + p.hue * 80)
-        ctx.fillStyle = `rgba(50,${g},40,0.72)`
-        ctx.beginPath()
-        ctx.ellipse(0, 0, p.size * 0.55, p.size * 2.2, 0, 0, Math.PI * 2)
-        ctx.fill()
-        // Central vein
-        ctx.strokeStyle = `rgba(30,${g - 30},20,0.45)`
-        ctx.lineWidth = 0.5
-        ctx.beginPath()
-        ctx.moveTo(0, -p.size * 2.2)
-        ctx.lineTo(0, p.size * 2.2)
-        ctx.stroke()
-
-      } else if (season === 'summer') {
-        // Lava ember — glowing orange spark that pulses
-        const alpha = 0.3 + 0.45 * Math.abs(Math.sin(t * 0.0025 + p.phase))
-        const r = p.size * 0.85
-        const g = Math.floor(40 + p.hue * 80)   // 40-120 green channel → orange→yellow
-        ctx.shadowColor = `rgba(255,${g},10,0.95)`
-        ctx.shadowBlur = 10
-        ctx.fillStyle = `rgba(255,${g},15,${alpha})`
-        ctx.beginPath()
-        ctx.arc(0, 0, r, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.shadowBlur = 0
-
-      } else if (season === 'autumn') {
-        // Autumn rain — angled streaks, varying opacity for depth
-        const alpha = 0.18 + p.hue * 0.32
-        ctx.strokeStyle = `rgba(160,195,230,${alpha})`
-        ctx.lineWidth = p.size * 0.7
-        ctx.lineCap = 'round'
-        const len = p.size * 12        // streak length
-        const slant = len * 0.18       // slight rightward slant
-        ctx.beginPath()
-        ctx.moveTo(-slant * 0.5, -len * 0.5)
-        ctx.lineTo( slant * 0.5,  len * 0.5)
-        ctx.stroke()
+    const loop = (t) => {
+      if (document.visibilityState === 'hidden') {
+        rafRef.current = 0
+        return
       }
-
-      ctx.restore()
-    }
-
-    const render = (t) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      for (const p of particles) {
-        if (season === 'summer') {
-          // Lava embers — drift upward (heat rising) with gentle sway
-          p.x += p.drift * 0.6 + Math.sin(t * 0.0008 + p.phase) * 0.5
-          p.y -= p.speed * 0.5 + Math.cos(t * 0.001 + p.phase) * 0.2  // RISE
-          if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width }
-          if (p.y > canvas.height + 10) p.y = -10
-        } else {
-          p.y += p.speed
-          p.x += p.drift
-          p.rot += p.rotV
-          if (p.y > canvas.height + 10) { p.y = -10; p.x = Math.random() * canvas.width }
-        }
-        if (p.x < -10) p.x = canvas.width + 10
-        if (p.x > canvas.width + 10) p.x = -10
+      const cw = canvas.width
+      const ch = canvas.height
+      ctx.clearRect(0, 0, cw, ch)
+      for (let i = 0, n = particles.length; i < n; i++) {
+        const p = particles[i]
+        updateParticle(p, t, cw, ch)
         drawParticle(p, t)
       }
-      rafRef.current = requestAnimationFrame(render)
+      rafRef.current = requestAnimationFrame(loop)
     }
 
-    rafRef.current = requestAnimationFrame(render)
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = 0
+      } else {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = requestAnimationFrame(loop)
+      }
+    }
+
+    document.addEventListener('visibilitychange', onVisibility)
+    rafRef.current = requestAnimationFrame(loop)
+
     return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
       cancelAnimationFrame(rafRef.current)
       window.removeEventListener('resize', resize)
     }
   }, [season])
 
-  return <canvas id="particle-canvas" className="snow-field" aria-hidden="true" />
+  return <canvas ref={canvasRef} className="snow-field" aria-hidden="true" />
 }
 
-function SideDecorations({ mouse, viewport, season }) {
+function SideDecorationsInner({ viewport, season }) {
   const glow = SEASON_CONFIG[season].sideGlow
+  const flakesRef = useRef([])
+  const innerRefs = useRef([])
 
   // Rejection-sampling packer: place each decoration randomly, retry if it
   // overlaps anything already placed (using actual pixel distances).
@@ -570,27 +672,85 @@ function SideDecorations({ mouse, viewport, season }) {
     return out
   }, [season, viewport.width, viewport.height])
 
+  flakesRef.current = flakes
+
+  // Imperative transform updates: zero React commits while the pointer moves
+  useLayoutEffect(() => {
+    innerRefs.current.length = flakes.length
+    const list = flakes
+    for (let i = 0; i < list.length; i++) {
+      const el = innerRefs.current[i]
+      if (el) {
+        el.style.transform = `translate(-50%, -50%) rotate(${list[i].baseAngle}deg)`
+      }
+    }
+  }, [flakes])
+
+  useEffect(() => {
+    let raf = 0
+    const latest = { x: 0, y: 0 }
+    const tick = () => {
+      raf = 0
+      const m = latest
+      const list = flakesRef.current
+      const refs = innerRefs.current
+      for (let i = 0, n = list.length; i < n; i++) {
+        const el = refs[i]
+        if (!el) continue
+        const flake = list[i]
+        const dx = m.x - flake.x
+        const dy = m.y - flake.y
+        const dist = Math.hypot(dx, dy)
+        const angle =
+          dist < 220 ? (Math.atan2(dy, dx) * 180) / Math.PI : flake.baseAngle
+        el.style.transform = `translate(-50%, -50%) rotate(${angle.toFixed(1)}deg)`
+      }
+    }
+    const onMove = (e) => {
+      latest.x = e.clientX
+      latest.y = e.clientY
+      if (!raf) raf = requestAnimationFrame(tick)
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
   return (
-    <div className="side-snowflakes" aria-hidden="true">
-      {flakes.map((flake) => {
-        const dist  = Math.hypot(mouse.x - flake.x, mouse.y - flake.y)
-        const angle = dist < 220
-          ? (Math.atan2(mouse.y - flake.y, mouse.x - flake.x) * 180) / Math.PI
-          : flake.baseAngle
+    <div className="side-snowflakes season-deco-enter" aria-hidden="true">
+      {flakes.map((flake, i) => {
+        const spinSec = 14 + (flake.id % 22)
 
         return (
           <div
             key={flake.id}
             className="side-flake"
             style={{
-              left:      `${flake.x}px`,
-              top:       `${flake.y}px`,
-              opacity:   flake.opacity,
-              transform: `translate(-50%,-50%) rotate(${angle.toFixed(1)}deg)`,
-              filter:    `drop-shadow(0 0 5px ${glow})`,
+              left:    `${flake.x}px`,
+              top:     `${flake.y}px`,
+              opacity: flake.opacity,
+              filter:  `drop-shadow(0 0 5px ${glow})`,
             }}
           >
-            <SeasonDecoSVG season={season} size={flake.size} detail={flake.detail} id={flake.id} />
+            <div
+              ref={(el) => {
+                innerRefs.current[i] = el
+              }}
+              className="side-flake-inner"
+              style={{ transform: `translate(-50%, -50%) rotate(${flake.baseAngle}deg)` }}
+            >
+              <div
+                className="side-flake-spin"
+                style={{
+                  animationDuration: `${spinSec}s`,
+                  animationDirection: flake.id % 2 === 0 ? 'normal' : 'reverse',
+                }}
+              >
+                <SeasonDecoSVG season={season} size={flake.size} detail={flake.detail} id={flake.id} />
+              </div>
+            </div>
           </div>
         )
       })}
@@ -598,78 +758,11 @@ function SideDecorations({ mouse, viewport, season }) {
   )
 }
 
-// ─── Project Demo Modal ───────────────────────────────────────────────────────
-const METHOD_COLOR = { GET: '#4caf50', POST: '#2196f3', PUT: '#ff9800', PATCH: '#9c27b0', DELETE: '#f44336' }
-
-function ProjectModal({ project, onClose }) {
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
-  if (!project?.demo) return null
-  const { demo } = project
-
-  return (
-    <div className="modal-overlay" onClick={onClose} aria-modal="true" role="dialog">
-      <div className="modal-card card" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
-
-        <p className="eyebrow">{project.category} · Private Demo</p>
-        <h2 className="modal-title">{project.title.split(':')[0]}</h2>
-        <p className="modal-sub">{project.excerpt}</p>
-
-        <div className="modal-chips">
-          {project.stack.split(' · ').map((t) => <span key={t}>{t}</span>)}
-        </div>
-
-        {/* API projects — endpoints + sample response */}
-        {demo.type === 'api' && (
-          <>
-            <h3 className="modal-section-head">Endpoints</h3>
-            <div className="endpoint-list">
-              {demo.endpoints.map((ep) => (
-                <div key={ep.path + ep.method} className="endpoint-row">
-                  <span className="ep-method" style={{ background: METHOD_COLOR[ep.method] }}>{ep.method}</span>
-                  <span className="ep-path">{ep.path}</span>
-                  <span className="ep-desc">{ep.desc}</span>
-                </div>
-              ))}
-            </div>
-            <h3 className="modal-section-head">Sample Response</h3>
-            <pre className="demo-code">{demo.sample}</pre>
-          </>
-        )}
-
-        {/* Desktop / mobile apps — screens + highlights */}
-        {demo.type === 'app' && (
-          <>
-            <h3 className="modal-section-head">App Screens</h3>
-            <div className="screen-grid">
-              {demo.screens.map((s) => (
-                <div key={s.label} className="screen-card">
-                  <p className="screen-label">{s.label}</p>
-                  <p className="screen-desc">{s.desc}</p>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        <h3 className="modal-section-head">Key Technical Highlights</h3>
-        <ul className="highlight-list">
-          {demo.highlights.map((h) => <li key={h}>{h}</li>)}
-        </ul>
-      </div>
-    </div>
-  )
-}
+const SideDecorations = memo(SideDecorationsInner)
 
 function App() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [activeDemo, setActiveDemo] = useState(null)
-  const [mouse, setMouse] = useState({ x: 0, y: 0 })
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight })
   const [season, setSeason] = useState(autoSeason)
   // true = user manually chose a season (overrides auto-sync)
@@ -692,33 +785,30 @@ function App() {
     setUserPicked(false)
   }
 
-  // Apply season-specific body bg + card tint as CSS vars
+  const closeDemo = useCallback(() => setActiveDemo(null), [])
+
+  // Apply season-specific body bg + card tint + ambient glows (CSS transitions handle smoothing)
   useEffect(() => {
     const cfg = SEASON_CONFIG[season]
-    document.body.style.background = cfg.bodyBg
-    document.documentElement.style.setProperty('--card-season-bg', cfg.cardBg)
+    document.body.style.backgroundColor = cfg.bodyBg
+    const root = document.documentElement
+    root.style.setProperty('--card-season-bg', cfg.cardBg)
+    root.style.setProperty('--season-glow-inner', cfg.glowInner)
+    root.style.setProperty('--season-glow-outer', cfg.glowOuter)
   }, [season])
 
   useEffect(() => {
-    let frameId = 0
-
-    const onPointerMove = (event) => {
-      window.cancelAnimationFrame(frameId)
-      frameId = window.requestAnimationFrame(() => {
-        setMouse({ x: event.clientX, y: event.clientY })
-      })
-    }
-
+    let debounceId = 0
     const onResize = () => {
-      setViewport({ width: window.innerWidth, height: window.innerHeight })
+      window.clearTimeout(debounceId)
+      debounceId = window.setTimeout(() => {
+        setViewport({ width: window.innerWidth, height: window.innerHeight })
+      }, 120)
     }
 
-    window.addEventListener('pointermove', onPointerMove)
-    window.addEventListener('resize', onResize)
-
+    window.addEventListener('resize', onResize, { passive: true })
     return () => {
-      window.cancelAnimationFrame(frameId)
-      window.removeEventListener('pointermove', onPointerMove)
+      window.clearTimeout(debounceId)
       window.removeEventListener('resize', onResize)
     }
   }, [])
@@ -745,13 +835,19 @@ function App() {
       </div>
 
       <main className="page">
-      <ParticleField season={season} />
-      <SideDecorations mouse={mouse} viewport={viewport} season={season} />
+      <div key={season} className="particle-season-wrap">
+        <ParticleField season={season} />
+      </div>
+      <AmbientRotors key={season} season={season} />
+      <SideDecorations key={season} viewport={viewport} season={season} />
         <div className="bg-glow bg-glow-left" />
         <div className="bg-glow bg-glow-right" />
 
         <header className="topbar card">
-          <p className="brand">Pavlo.dev</p>
+          <p className="brand">
+            <span className="brand-rotor" aria-hidden="true" />
+            Pavlo.dev
+          </p>
           <div className="top-links">
             <a href="#approach">Approach</a>
             <a href="#projects">Work</a>
@@ -782,7 +878,9 @@ function App() {
           </div>
         </header>
 
-      <section className="hero card">
+      <section className="hero card hero-with-rotors">
+        <span className="card-rotor card-rotor--tl" aria-hidden="true" />
+        <span className="card-rotor card-rotor--br" aria-hidden="true" />
         <div className="hero-main">
           <p className="eyebrow">C#, APIs, desktop &amp; mobile</p>
           <h1>{profile.name}</h1>
@@ -821,7 +919,8 @@ function App() {
         </aside>
       </section>
 
-      <section className="card approach" id="approach">
+      <section className="card approach section-with-rotors" id="approach">
+        <span className="card-rotor card-rotor--tr" aria-hidden="true" />
         <h2>What I actually care about</h2>
         <p className="approach-lead">
           Not a manifesto — just habits that show up in the projects underneath.
@@ -837,7 +936,8 @@ function App() {
       </section>
 
       <section className="content-layout">
-        <section className="card feed" id="projects">
+        <section className="card feed section-with-rotors" id="projects">
+          <span className="card-rotor card-rotor--bl" aria-hidden="true" />
           <h2>Projects</h2>
           <div className="feed-list">
             {filteredPosts.map((post) => (
@@ -864,7 +964,8 @@ function App() {
         </section>
 
         <aside className="sidebar">
-          <section className="card sticky" id="categories">
+          <section className="card sticky section-with-rotors" id="categories">
+            <span className="card-rotor card-rotor--tr-small" aria-hidden="true" />
             <h2>Categories</h2>
             <div className="category-grid">
               {categories.map((category) => (
@@ -889,7 +990,8 @@ function App() {
             </ol>
           </section>
 
-          <section className="card">
+          <section className="card section-with-rotors">
+            <span className="card-rotor card-rotor--br-small" aria-hidden="true" />
             <h2>Core stack</h2>
             <div className="stack-cloud">
               {techStack.map((item) => (
@@ -954,7 +1056,11 @@ function App() {
         )})()}
       </div>
 
-      {activeDemo && <ProjectModal project={activeDemo} onClose={() => setActiveDemo(null)} />}
+      {activeDemo && (
+        <Suspense fallback={null}>
+          <ProjectModal project={activeDemo} onClose={closeDemo} />
+        </Suspense>
+      )}
     </>
   )
 }
