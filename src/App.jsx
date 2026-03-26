@@ -1,6 +1,5 @@
 import {
   lazy,
-  memo,
   Suspense,
   useCallback,
   useEffect,
@@ -12,6 +11,15 @@ import {
 import './App.css'
 
 const ProjectModal = lazy(() => import('./ProjectModal.jsx'))
+
+// Single global rAF + monotonic session — avoids shared useRef missing the handle to cancel.
+let __particleCanvasSession = 0
+let __particleRafId = 0
+
+function cancelParticleRaf() {
+  cancelAnimationFrame(__particleRafId)
+  __particleRafId = 0
+}
 
 // ─── Season System ────────────────────────────────────────────────────────────
 const SEASON_CONFIG = {
@@ -421,7 +429,7 @@ const SEASON_PLACEMENT = {
 
 const AMBIENT_ROT_SEED = { winter: 0xa11b001, spring: 0xa11b002, summer: 0xa11b003, autumn: 0xa11b004 }
 
-function AmbientRotorsInner({ season }) {
+function AmbientRotors({ season }) {
   const items = useMemo(() => {
     const rng = lcg(AMBIENT_ROT_SEED[season])
     const n = 16
@@ -459,33 +467,67 @@ function AmbientRotorsInner({ season }) {
   )
 }
 
-const AmbientRotors = memo(AmbientRotorsInner)
-
 function ParticleField({ season }) {
   const canvasRef = useRef(null)
-  const rafRef = useRef(0)
 
-  useEffect(() => {
+  // One <canvas> instance for the whole app lifetime; [season] only swaps the sim + rAF (no remount).
+  useLayoutEffect(() => {
+    cancelParticleRaf()
+    const session = ++__particleCanvasSession
+
     const canvas = canvasRef.current
     if (!canvas) return
+
+    const wrap = canvas.closest('.particle-season-wrap')
+    wrap?.querySelectorAll('canvas.snow-field').forEach((c) => {
+      if (c !== canvas) c.remove()
+    })
+    const w0 = window.innerWidth
+    const h0 = window.innerHeight
+    // Reset bitmap so no previous season pixels linger on the same element
+    canvas.width = w0
+    canvas.height = h0
     const ctx = canvas.getContext('2d', { alpha: true })
+    if (!ctx) return
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.globalAlpha = 1
+    ctx.globalCompositeOperation = 'source-over'
 
     const particles = []
-    // Autumn gets many more particles for a dense rain effect
-    const COUNT = season === 'autumn' ? 280 : season === 'winter' ? 95 : 88
+    // Autumn: many thin streaks; other seasons: fewer, larger motes
+    const COUNT = season === 'autumn' ? 240 : season === 'winter' ? 95 : 88
+    const isAutumn = season === 'autumn'
 
-    const resize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-      if (!particles.length) {
-        const isAutumn = season === 'autumn'
-        for (let i = 0; i < COUNT; i++) {
+    let alive = true
+
+    const seedParticles = () => {
+      particles.length = 0
+      const w = canvas.width
+      const h = canvas.height
+      if (w < 1 || h < 1) return
+      for (let i = 0; i < COUNT; i++) {
+        if (isAutumn) {
           particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            size: isAutumn ? 0.8 + Math.random() * 1.2 : 1 + Math.random() * 2.8,
-            speed: isAutumn ? 4 + Math.random() * 6 : 0.2 + Math.random() * 0.6,
-            drift: isAutumn ? (Math.random() - 0.5) * 0.6 : (Math.random() - 0.5) * 0.4,
+            x: Math.random() * w,
+            y: Math.random() * h,
+            // line width (px) — keep thin so it reads as water, not scratches
+            size: 0.35 + Math.random() * 0.55,
+            speed: 12 + Math.random() * 18,
+            drift: -1.4 + Math.random() * 2.8,
+            rot: 0,
+            rotV: 0,
+            hue: Math.random(),
+            phase: Math.random() * 6.28,
+            // streak length along velocity; scales a bit with screen height
+            len: (14 + Math.random() * 26) * (1 + Math.min(h, 1200) / 2400),
+          })
+        } else {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            size: 1 + Math.random() * 2.8,
+            speed: 0.2 + Math.random() * 0.6,
+            drift: (Math.random() - 0.5) * 0.4,
             rot: Math.random() * Math.PI * 2,
             rotV: (Math.random() - 0.5) * 0.04,
             hue: Math.random(),
@@ -495,7 +537,22 @@ function ParticleField({ season }) {
       }
     }
 
-    resize()
+    seedParticles()
+
+    const resize = () => {
+      if (session !== __particleCanvasSession) return
+      const w = window.innerWidth
+      const h = window.innerHeight
+      const dimsChanged = canvas.width !== w || canvas.height !== h
+      if (dimsChanged) {
+        canvas.width = w
+        canvas.height = h
+      }
+      if (dimsChanged || particles.length === 0) {
+        seedParticles()
+      }
+    }
+
     window.addEventListener('resize', resize, { passive: true })
 
     // Pick once per season — avoids branching inside the hot loop (hundreds of particles × 60fps)
@@ -547,20 +604,19 @@ function ParticleField({ season }) {
                 ctx.restore()
               }
             : (p, t) => {
-                ctx.save()
-                ctx.translate(p.x, p.y)
-                ctx.rotate(p.rot * 0.08 + Math.sin(t * 0.0004 + p.phase) * 0.12)
-                const alpha = 0.18 + p.hue * 0.32
-                ctx.strokeStyle = `rgba(150,128,108,${alpha})`
-                ctx.lineWidth = p.size * 0.7
+                // Rain: align streak with fall vector (drift, speed), cool desaturated blue-grey
+                const mag = Math.hypot(p.drift, p.speed) || 1
+                const ux = p.drift / mag
+                const uy = p.speed / mag
+                const half = p.len * 0.5
+                const alpha = 0.14 + p.hue * 0.38
+                ctx.strokeStyle = `rgba(168,184,208,${alpha})`
+                ctx.lineWidth = p.size
                 ctx.lineCap = 'round'
-                const len = p.size * 12
-                const slant = len * 0.18
                 ctx.beginPath()
-                ctx.moveTo(-slant * 0.5, -len * 0.5)
-                ctx.lineTo(slant * 0.5, len * 0.5)
+                ctx.moveTo(p.x - ux * half, p.y - uy * half)
+                ctx.lineTo(p.x + ux * half, p.y + uy * half)
                 ctx.stroke()
-                ctx.restore()
               }
 
     const updateParticle =
@@ -583,48 +639,76 @@ function ParticleField({ season }) {
           }
 
     const loop = (t) => {
+      if (session !== __particleCanvasSession || !alive) return
       if (document.visibilityState === 'hidden') {
-        rafRef.current = 0
+        cancelParticleRaf()
         return
       }
       const cw = canvas.width
       const ch = canvas.height
       ctx.clearRect(0, 0, cw, ch)
-      for (let i = 0, n = particles.length; i < n; i++) {
-        const p = particles[i]
-        updateParticle(p, t, cw, ch)
-        drawParticle(p, t)
+      if (cw >= 1 && ch >= 1) {
+        for (let i = 0, n = particles.length; i < n; i++) {
+          const p = particles[i]
+          updateParticle(p, t, cw, ch)
+          drawParticle(p, t)
+        }
       }
-      rafRef.current = requestAnimationFrame(loop)
+      if (alive && session === __particleCanvasSession) {
+        __particleRafId = requestAnimationFrame(loop)
+      }
     }
 
     const onVisibility = () => {
-      if (document.visibilityState === 'hidden') {
-        cancelAnimationFrame(rafRef.current)
-        rafRef.current = 0
-      } else {
-        cancelAnimationFrame(rafRef.current)
-        rafRef.current = requestAnimationFrame(loop)
+      if (session !== __particleCanvasSession || !alive) return
+      cancelParticleRaf()
+      if (document.visibilityState === 'visible') {
+        __particleRafId = requestAnimationFrame(loop)
       }
     }
 
     document.addEventListener('visibilitychange', onVisibility)
-    rafRef.current = requestAnimationFrame(loop)
+    __particleRafId = requestAnimationFrame(loop)
 
     return () => {
+      alive = false
       document.removeEventListener('visibilitychange', onVisibility)
-      cancelAnimationFrame(rafRef.current)
+      cancelParticleRaf()
       window.removeEventListener('resize', resize)
+      try {
+        if (canvas.width > 0 && canvas.height > 0) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+        }
+      } catch {
+        /* canvas may be detached */
+      }
     }
   }, [season])
 
   return <canvas ref={canvasRef} className="snow-field" aria-hidden="true" />
 }
 
-function SideDecorationsInner({ viewport, season }) {
+function SideDecorations({ viewport, season }) {
+  const [mouse, setMouse] = useState({ x: 0, y: 0 })
   const glow = SEASON_CONFIG[season].sideGlow
-  const flakesRef = useRef([])
-  const innerRefs = useRef([])
+
+  useEffect(() => {
+    let raf = 0
+    let latest = { x: 0, y: 0 }
+    const flush = () => {
+      raf = 0
+      setMouse({ x: latest.x, y: latest.y })
+    }
+    const onMove = (e) => {
+      latest = { x: e.clientX, y: e.clientY }
+      if (!raf) raf = requestAnimationFrame(flush)
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
 
   // Rejection-sampling packer: place each decoration randomly, retry if it
   // overlaps anything already placed (using actual pixel distances).
@@ -672,60 +756,19 @@ function SideDecorationsInner({ viewport, season }) {
     return out
   }, [season, viewport.width, viewport.height])
 
-  flakesRef.current = flakes
-
-  // Imperative transform updates: zero React commits while the pointer moves
-  useLayoutEffect(() => {
-    innerRefs.current.length = flakes.length
-    const list = flakes
-    for (let i = 0; i < list.length; i++) {
-      const el = innerRefs.current[i]
-      if (el) {
-        el.style.transform = `translate(-50%, -50%) rotate(${list[i].baseAngle}deg)`
-      }
-    }
-  }, [flakes])
-
-  useEffect(() => {
-    let raf = 0
-    const latest = { x: 0, y: 0 }
-    const tick = () => {
-      raf = 0
-      const m = latest
-      const list = flakesRef.current
-      const refs = innerRefs.current
-      for (let i = 0, n = list.length; i < n; i++) {
-        const el = refs[i]
-        if (!el) continue
-        const flake = list[i]
-        const dx = m.x - flake.x
-        const dy = m.y - flake.y
-        const dist = Math.hypot(dx, dy)
-        const angle =
-          dist < 220 ? (Math.atan2(dy, dx) * 180) / Math.PI : flake.baseAngle
-        el.style.transform = `translate(-50%, -50%) rotate(${angle.toFixed(1)}deg)`
-      }
-    }
-    const onMove = (e) => {
-      latest.x = e.clientX
-      latest.y = e.clientY
-      if (!raf) raf = requestAnimationFrame(tick)
-    }
-    window.addEventListener('pointermove', onMove, { passive: true })
-    return () => {
-      window.removeEventListener('pointermove', onMove)
-      cancelAnimationFrame(raf)
-    }
-  }, [])
-
   return (
     <div className="side-snowflakes season-deco-enter" aria-hidden="true">
-      {flakes.map((flake, i) => {
+      {flakes.map((flake) => {
+        const dist = Math.hypot(mouse.x - flake.x, mouse.y - flake.y)
+        const angle =
+          dist < 220
+            ? (Math.atan2(mouse.y - flake.y, mouse.x - flake.x) * 180) / Math.PI
+            : flake.baseAngle
         const spinSec = 14 + (flake.id % 22)
 
         return (
           <div
-            key={flake.id}
+            key={`${season}-flake-${flake.id}`}
             className="side-flake"
             style={{
               left:    `${flake.x}px`,
@@ -735,11 +778,10 @@ function SideDecorationsInner({ viewport, season }) {
             }}
           >
             <div
-              ref={(el) => {
-                innerRefs.current[i] = el
-              }}
               className="side-flake-inner"
-              style={{ transform: `translate(-50%, -50%) rotate(${flake.baseAngle}deg)` }}
+              style={{
+                transform: `translate(-50%, -50%) rotate(${angle.toFixed(1)}deg)`,
+              }}
             >
               <div
                 className="side-flake-spin"
@@ -758,7 +800,23 @@ function SideDecorationsInner({ viewport, season }) {
   )
 }
 
-const SideDecorations = memo(SideDecorationsInner)
+/**
+ * Fixed layer between mountain art (z-0) and .page (z-3). No createPortal — avoids mount races.
+ * ParticleField stays mounted; decor remounts per season.
+ */
+function SeasonVisualLayer({ season, viewport }) {
+  return (
+    <div className="season-visual-root" data-season={season}>
+      <div className="particle-season-wrap">
+        <ParticleField season={season} />
+      </div>
+      <div key={season} className="season-decor-layer">
+        <AmbientRotors season={season} />
+        <SideDecorations viewport={viewport} season={season} />
+      </div>
+    </div>
+  )
+}
 
 function App() {
   const [activeCategory, setActiveCategory] = useState('All')
@@ -822,24 +880,25 @@ function App() {
 
   return (
     <>
-      {/* ── Top mountain band – scrolls with page, full viewport width ── */}
-      <div className="mtn-band mtn-band-top" aria-hidden="true">
-        {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
-          <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 92  Q350 8   720 98  Q1050 8   1440 85  L1440 380 L0 380 Z" fill={c0}/>
-            <path d="M0 148 Q450 62  720 155 Q1100 62  1440 140 L1440 380 L0 380 Z" fill={c1}/>
-            <path d="M0 202 Q300 118 640 208 Q980  118 1440 195 L1440 380 L0 380 Z" fill={c2}/>
-            <path d="M0 258 Q480 175 720 262 Q1050 178 1440 248 L1440 380 L0 380 Z" fill={c3}/>
-          </svg>
-        )})()}
+      {/* Peaks = back-most art; particles portal mounts above this, .page above both */}
+      <div className="peaks-layer peaks-layer--top" aria-hidden="true">
+        <div className="mtn-band mtn-band-top">
+          {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
+            <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 92  Q350 8   720 98  Q1050 8   1440 85  L1440 380 L0 380 Z" fill={c0}/>
+              <path d="M0 148 Q450 62  720 155 Q1100 62  1440 140 L1440 380 L0 380 Z" fill={c1}/>
+              <path d="M0 202 Q300 118 640 208 Q980  118 1440 195 L1440 380 L0 380 Z" fill={c2}/>
+              <path d="M0 258 Q480 175 720 262 Q1050 178 1440 248 L1440 380 L0 380 Z" fill={c3}/>
+            </svg>
+          )})()}
+        </div>
+      </div>
+
+      <div id="season-visual-portal" className="season-visual-mount">
+        <SeasonVisualLayer season={season} viewport={viewport} />
       </div>
 
       <main className="page">
-      <div key={season} className="particle-season-wrap">
-        <ParticleField season={season} />
-      </div>
-      <AmbientRotors key={season} season={season} />
-      <SideDecorations key={season} viewport={viewport} season={season} />
         <div className="bg-glow bg-glow-left" />
         <div className="bg-glow bg-glow-right" />
 
@@ -1044,16 +1103,17 @@ function App() {
         </footer>
       </main>
 
-      {/* ── Bottom mountain band – scrolls with page, full viewport width ── */}
-      <div className="mtn-band mtn-band-bottom" aria-hidden="true">
-        {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
-          <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 305 Q350 362 720 298 Q1050 360 1440 312 L1440 0 L0 0 Z" fill={c0}/>
-            <path d="M0 250 Q450 300 720 244 Q1100 298 1440 255 L1440 0 L0 0 Z" fill={c1}/>
-            <path d="M0 196 Q300 242 640 190 Q980  240 1440 200 L1440 0 L0 0 Z" fill={c2}/>
-            <path d="M0 145 Q480 188 720 148 Q1050 185 1440 152 L1440 0 L0 0 Z" fill={c3}/>
-          </svg>
-        )})()}
+      <div className="peaks-layer peaks-layer--bottom" aria-hidden="true">
+        <div className="mtn-band mtn-band-bottom">
+          {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
+            <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 305 Q350 362 720 298 Q1050 360 1440 312 L1440 0 L0 0 Z" fill={c0}/>
+              <path d="M0 250 Q450 300 720 244 Q1100 298 1440 255 L1440 0 L0 0 Z" fill={c1}/>
+              <path d="M0 196 Q300 242 640 190 Q980  240 1440 200 L1440 0 L0 0 Z" fill={c2}/>
+              <path d="M0 145 Q480 188 720 148 Q1050 185 1440 152 L1440 0 L0 0 Z" fill={c3}/>
+            </svg>
+          )})()}
+        </div>
       </div>
 
       {activeDemo && (

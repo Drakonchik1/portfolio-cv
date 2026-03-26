@@ -1,3 +1,18 @@
+/* Behind particles (z-0); .page sits above at z-3 */
+.peaks-layer {
+  position: relative;
+  z-index: 0;
+}
+
+/* Portal target: fixed overlay between peaks and main content */
+#season-visual-portal.season-visual-mount,
+.season-visual-mount {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
 /* Full-width mountain bands that scroll with the page */
 .mtn-band {
   width: 100%;
@@ -27,6 +42,7 @@
 
 .page {
   position: relative;
+  z-index: 3;
   width: min(1140px, 92vw);
   margin: 0 auto;
   padding: 0.85rem 0 2rem;
@@ -87,9 +103,26 @@
 }
 
 
+/* Fills .season-visual-mount (fixed z-2 between peaks and .page) */
+.season-visual-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  isolation: isolate;
+}
+
+/* Sibling of particle wrap; key={season} remounts only decor, not the canvas */
+.season-decor-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* Wraps canvas so each season change can ease in */
 .particle-season-wrap {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
@@ -103,7 +136,7 @@
 }
 
 .side-snowflakes {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
@@ -160,7 +193,7 @@
 
 /* Full-viewport slow rings — sit behind content */
 .ambient-rotors {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;

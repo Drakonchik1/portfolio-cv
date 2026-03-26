@@ -21,8 +21,11 @@ body {
   transition: background-color 0.85s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
+/* Stacking (peaks → particles → page) lives inside #root — see .peaks-layer / .season-visual-mount in App.css */
 #root {
   min-height: 100vh;
+  position: relative;
+  isolation: isolate;
 }
 
 @keyframes bodyFade {
