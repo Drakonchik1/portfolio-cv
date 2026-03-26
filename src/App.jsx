@@ -44,14 +44,18 @@ function autoSeason() {
 
 const profile = {
   name: 'Pavlo Dorofieiev',
-  role: 'Junior Software Developer (.NET / MAUI / WPF / Web)',
+  role: '.NET developer · APIs, WPF, MAUI, and web where it fits',
   location: 'Tychy, Poland',
   email: 'pavlo.dorofieiev@gmail.com',
   phone: '+48 576 468 614',
   linkedin: 'https://www.linkedin.com/in/pavlo-dorofieiev-596b282b1/',
-  github: 'https://github.com/Kwadrakon',
+  github: 'https://github.com/Drakonchik1',
+  portfolio: 'https://portfolio-cv-six-indol.vercel.app',
+  portfolioRepo: 'https://github.com/Drakonchik1/portfolio-cv',
+  telegram: 'https://t.me/Drakon_v2',
+  whatsapp: 'https://wa.me/48576468614',
   summary:
-    'I build practical software products with clean backend architecture, useful web interfaces, and reliable business logic. I focus on things teams need in real projects: API quality, clear structure, and fast delivery.',
+    "I work mostly in C#: ASP.NET Core for APIs, WPF for desktop, MAUI when the same codebase needs to hit mobile. I keep layouts and naming straightforward so teammates can find things quickly, return errors that are useful in logs, and use async properly so the UI stays responsive during I/O.",
 }
 
 const techStack = ['C#', '.NET', 'ASP.NET Core', 'EF Core', 'SQLite', 'WPF', 'MAUI', 'React', 'REST APIs']
@@ -65,6 +69,38 @@ const projectPosts = [
     stack: 'ASP.NET Core · EF Core · SQLite · Swagger',
     category: 'Backend',
     link: '#',
+    demo: {
+      type: 'api',
+      endpoints: [
+        { method: 'GET',    path: '/api/tasks',      desc: 'List tasks — filter by status/priority, sort, paginate' },
+        { method: 'POST',   path: '/api/tasks',      desc: 'Create task with validation' },
+        { method: 'PUT',    path: '/api/tasks/{id}', desc: 'Update title, priority, progress' },
+        { method: 'DELETE', path: '/api/tasks/{id}', desc: 'Remove task' },
+      ],
+      sample: `// GET /api/tasks?status=InProgress&priority=High&page=1
+{
+  "items": [
+    {
+      "id": 3,
+      "title": "Fix authentication middleware",
+      "priority": "High",
+      "status": "InProgress",
+      "createdAt": "2024-03-10T09:15:00Z",
+      "dueDate": "2024-03-15T18:00:00Z"
+    }
+  ],
+  "totalCount": 8,
+  "page": 1,
+  "pageSize": 10,
+  "totalPages": 1
+}`,
+      highlights: [
+        'Global exception middleware — consistent error envelope',
+        'Pagination + multi-field sorting on every list endpoint',
+        'Enum serialized as strings (JsonStringEnumConverter)',
+        'EF Core query optimisation with compiled indexes',
+      ],
+    },
   },
   {
     title: 'BookingSystemAPI: Full Booking Application',
@@ -72,7 +108,35 @@ const projectPosts = [
       'A full-stack booking app with conflict detection, status workflows, seeded data, API endpoints, and integrated web UI.',
     stack: 'ASP.NET Core · EF Core · SQLite · JavaScript',
     category: 'Full-Stack',
-    link: 'http://localhost:5283',
+    link: '#',
+    demo: {
+      type: 'api',
+      endpoints: [
+        { method: 'GET',   path: '/api/catalog',           desc: 'Browse providers and service types' },
+        { method: 'POST',  path: '/api/bookings',          desc: 'Create booking — conflict detection included' },
+        { method: 'PATCH', path: '/api/bookings/{id}/status', desc: 'Advance status: Pending → Confirmed → Completed' },
+        { method: 'DELETE',path: '/api/bookings/{id}',     desc: 'Cancel booking' },
+      ],
+      sample: `// POST /api/bookings
+{
+  "serviceTypeId": 2,
+  "providerId": 1,
+  "clientName": "Anna Kowalska",
+  "startTime": "2024-04-20T10:00:00",
+  "endTime":   "2024-04-20T11:00:00"
+}
+
+// 409 Conflict if slot is already taken:
+{
+  "error": "Time slot is already booked for this provider."
+}`,
+      highlights: [
+        'Overlap detection: rejects double-bookings at service layer',
+        'Status machine: Pending → Confirmed → Completed / Cancelled',
+        'Integrated vanilla JS front-end served from wwwroot',
+        'Seeded catalog (providers + service types) on first run',
+      ],
+    },
   },
   {
     title: 'WeatherApp: API-Driven Desktop Analytics',
@@ -81,6 +145,21 @@ const projectPosts = [
     stack: '.NET 8 · WPF · REST APIs · JSON',
     category: 'Desktop',
     link: '#',
+    demo: {
+      type: 'app',
+      screens: [
+        { label: 'Dashboard',    desc: 'Live temperature, humidity, wind speed and pressure charts updated every 15 min.' },
+        { label: 'Date Filter',  desc: 'Custom date range picker — loads historical data from both OpenWeatherMap and IMGW APIs.' },
+        { label: 'Data Sources', desc: 'Toggle between sources; side-by-side comparison mode shows API discrepancies.' },
+        { label: 'CSV Export',   desc: 'One-click export of the current view to a spreadsheet-ready CSV file.' },
+      ],
+      highlights: [
+        'Dual API integration — OpenWeatherMap + Polish IMGW',
+        'MVVM pattern with data-binding throughout',
+        'Async fetch with cancellation tokens (no UI freeze)',
+        'Auto-retry on network failure with exponential back-off',
+      ],
+    },
   },
   {
     title: 'Budzik: Cross-Platform Alarm Scheduler',
@@ -89,6 +168,21 @@ const projectPosts = [
     stack: '.NET MAUI · C# · Android APIs',
     category: 'Mobile',
     link: '#',
+    demo: {
+      type: 'app',
+      screens: [
+        { label: 'Alarm List',   desc: 'All alarms with next-trigger time, enable/disable toggle and swipe-to-delete.' },
+        { label: 'Add Alarm',    desc: 'Time picker, repeat pattern (once / daily / weekdays) and custom label.' },
+        { label: 'Notification', desc: 'Heads-up notification with Dismiss and Snooze actions, exact scheduling via AlarmManager.' },
+        { label: 'Settings',     desc: 'Default snooze duration, ringtone selection, vibration toggle.' },
+      ],
+      highlights: [
+        'Android AlarmManager.setExactAndAllowWhileIdle for precision',
+        'Notification channels with importance levels (API 26+)',
+        'Background service survives app close and device restart',
+        'Platform-specific code via MAUI dependency injection',
+      ],
+    },
   },
   {
     title: 'ReflexGame: Event-Driven Mobile Logic',
@@ -97,15 +191,45 @@ const projectPosts = [
     stack: '.NET MAUI · C# · UX State Logic',
     category: 'Mobile',
     link: '#',
+    demo: {
+      type: 'app',
+      screens: [
+        { label: 'Ready Screen', desc: 'Countdown before the stimulus — random delay 1–4 s prevents anticipation.' },
+        { label: 'Reaction',     desc: 'Tap as fast as possible after the green flash. Timer precision: ±1 ms.' },
+        { label: 'False Start',  desc: 'Tap before the stimulus → penalty round displayed with explanation.' },
+        { label: 'Leaderboard',  desc: 'Top 10 personal scores stored with SQLite, sortable by date or time.' },
+      ],
+      highlights: [
+        'Finite state machine: Idle → Waiting → Active → Result → Ranked',
+        'CancellationToken-backed timer — no leaking async operations',
+        'False-start detection with ≤ 100 ms threshold',
+        'Persistent local ranking via SQLite + EF Core',
+      ],
+    },
   },
 ]
 
-const popularContent = [
-  'TaskManagerAPI architecture overview',
-  'Booking conflict detection logic',
-  'Weather API integration patterns',
-  'MAUI state management examples',
-  'Practical backend validation patterns',
+const approachPillars = [
+  {
+    title: 'Backends',
+    body: "I validate input before it wanders too deep. If something throws, I'd rather the client gets a clear JSON message than a silent 500.",
+  },
+  {
+    title: 'Desktop & phones',
+    body: 'WPF and MAUI taught me to watch async/await and the UI thread — the boring stuff that stops windows from locking up mid-request.',
+  },
+  {
+    title: 'Git history',
+    body: 'I split work into smaller commits when I can. Makes it easier for someone else to read, and easier for me to roll back a bad idea.',
+  },
+]
+
+const technicalFocus = [
+  'EF Core — trying not to trip over N+1 queries',
+  'Booking logic and “this slot is already taken” cases',
+  'Two weather APIs in one WPF app without lying in the chart',
+  'Android alarms: channels, permissions, the usual headache',
+  'Lists with filters + paging that still behave',
 ]
 
 // ─── Koch fractal snowflake generator ────────────────────────────────────────
@@ -474,8 +598,77 @@ function SideDecorations({ mouse, viewport, season }) {
   )
 }
 
+// ─── Project Demo Modal ───────────────────────────────────────────────────────
+const METHOD_COLOR = { GET: '#4caf50', POST: '#2196f3', PUT: '#ff9800', PATCH: '#9c27b0', DELETE: '#f44336' }
+
+function ProjectModal({ project, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  if (!project?.demo) return null
+  const { demo } = project
+
+  return (
+    <div className="modal-overlay" onClick={onClose} aria-modal="true" role="dialog">
+      <div className="modal-card card" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
+
+        <p className="eyebrow">{project.category} · Private Demo</p>
+        <h2 className="modal-title">{project.title.split(':')[0]}</h2>
+        <p className="modal-sub">{project.excerpt}</p>
+
+        <div className="modal-chips">
+          {project.stack.split(' · ').map((t) => <span key={t}>{t}</span>)}
+        </div>
+
+        {/* API projects — endpoints + sample response */}
+        {demo.type === 'api' && (
+          <>
+            <h3 className="modal-section-head">Endpoints</h3>
+            <div className="endpoint-list">
+              {demo.endpoints.map((ep) => (
+                <div key={ep.path + ep.method} className="endpoint-row">
+                  <span className="ep-method" style={{ background: METHOD_COLOR[ep.method] }}>{ep.method}</span>
+                  <span className="ep-path">{ep.path}</span>
+                  <span className="ep-desc">{ep.desc}</span>
+                </div>
+              ))}
+            </div>
+            <h3 className="modal-section-head">Sample Response</h3>
+            <pre className="demo-code">{demo.sample}</pre>
+          </>
+        )}
+
+        {/* Desktop / mobile apps — screens + highlights */}
+        {demo.type === 'app' && (
+          <>
+            <h3 className="modal-section-head">App Screens</h3>
+            <div className="screen-grid">
+              {demo.screens.map((s) => (
+                <div key={s.label} className="screen-card">
+                  <p className="screen-label">{s.label}</p>
+                  <p className="screen-desc">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        <h3 className="modal-section-head">Key Technical Highlights</h3>
+        <ul className="highlight-list">
+          {demo.highlights.map((h) => <li key={h}>{h}</li>)}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [activeCategory, setActiveCategory] = useState('All')
+  const [activeDemo, setActiveDemo] = useState(null)
   const [mouse, setMouse] = useState({ x: 0, y: 0 })
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight })
   const [season, setSeason] = useState(autoSeason)
@@ -560,8 +753,9 @@ function App() {
         <header className="topbar card">
           <p className="brand">Pavlo.dev</p>
           <div className="top-links">
-            <a href="#projects">Projects</a>
-            <a href="#categories">Categories</a>
+            <a href="#approach">Approach</a>
+            <a href="#projects">Work</a>
+            <a href="#categories">Filter</a>
             <a href="#contact">Contact</a>
           </div>
           <div className="season-picker" role="group" aria-label="Season theme">
@@ -590,7 +784,7 @@ function App() {
 
       <section className="hero card">
         <div className="hero-main">
-          <p className="eyebrow">Software Engineering Portfolio</p>
+          <p className="eyebrow">C#, APIs, desktop &amp; mobile</p>
           <h1>{profile.name}</h1>
           <p className="role">{profile.role}</p>
           <p className="summary">{profile.summary}</p>
@@ -606,28 +800,45 @@ function App() {
           </div>
         </div>
         <aside className="hero-side">
-          <p className="eyebrow">Build Focus</p>
+          <p className="eyebrow">Quick numbers</p>
           <div className="stats-grid">
             <article>
-              <p className="kpi-value">5+</p>
-              <p className="kpi-label">Featured projects</p>
+              <p className="kpi-value">5</p>
+              <p className="kpi-label">projects with demos on this page</p>
             </article>
             <article>
               <p className="kpi-value">.NET</p>
-              <p className="kpi-label">Core stack</p>
+              <p className="kpi-label">where I’m most at home</p>
             </article>
             <article>
-              <p className="kpi-value">API + UI</p>
-              <p className="kpi-label">Delivery focus</p>
+              <p className="kpi-value">mix</p>
+              <p className="kpi-label">APIs, WPF, MAUI, a bit of web</p>
             </article>
           </div>
-          <p className="availability">Open for internships and junior developer roles in .NET/web development</p>
+          <p className="availability">
+            Based in Tychy. Hybrid nearby is fine; remote works if our hours overlap with CET reasonably well.
+          </p>
         </aside>
+      </section>
+
+      <section className="card approach" id="approach">
+        <h2>What I actually care about</h2>
+        <p className="approach-lead">
+          Not a manifesto — just habits that show up in the projects underneath.
+        </p>
+        <div className="approach-grid">
+          {approachPillars.map((item) => (
+            <article key={item.title} className="approach-item">
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="content-layout">
         <section className="card feed" id="projects">
-          <h2>Projects and case studies</h2>
+          <h2>Projects</h2>
           <div className="feed-list">
             {filteredPosts.map((post) => (
               <article key={post.title} className="feed-item">
@@ -635,13 +846,18 @@ function App() {
                 <h3>{post.title}</h3>
                 <p>{post.excerpt}</p>
                 <p className="meta-line">{post.stack}</p>
-                {post.link === '#' ? (
-                  <span className="read-more disabled">Private demo</span>
-                ) : (
-                  <a className="read-more" href={post.link} target="_blank" rel="noreferrer">
-                    Open project
-                  </a>
-                )}
+                <div className="feed-actions">
+                  {post.link !== '#' && (
+                    <a className="read-more" href={post.link} target="_blank" rel="noreferrer">
+                      Open project
+                    </a>
+                  )}
+                  {post.demo && (
+                    <button className="read-more demo-btn" onClick={() => setActiveDemo(post)}>
+                      View demo
+                    </button>
+                  )}
+                </div>
               </article>
             ))}
           </div>
@@ -649,7 +865,7 @@ function App() {
 
         <aside className="sidebar">
           <section className="card sticky" id="categories">
-            <h2>Browse by category</h2>
+            <h2>Categories</h2>
             <div className="category-grid">
               {categories.map((category) => (
                 <button
@@ -665,9 +881,9 @@ function App() {
           </section>
 
           <section className="card">
-            <h2>Popular content</h2>
+            <h2>Stuff I’ve dug into</h2>
             <ol className="popular-list">
-              {popularContent.map((item) => (
+              {technicalFocus.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ol>
@@ -685,27 +901,43 @@ function App() {
       </section>
 
       <section className="card cta" id="contact">
-        <h2>Want someone who can ship?</h2>
+        <h2>Contact</h2>
         <p className="summary">
-          I combine backend depth, practical architecture, and product-focused execution. If your team needs a junior
-          developer who learns fast and delivers clean solutions, let us talk.
+          If you’re hiring for .NET, desktop, or MAUI work — or something close — email or LinkedIn is fine. I’ll
+          reply.
         </p>
         <div className="chips">
-          <a href={`mailto:${profile.email}`}>Email me</a>
-          <a href={`tel:${profile.phone.replace(/\s/g, '')}`}>Call me</a>
+          <a href={`mailto:${profile.email}`}>Email</a>
+          <a href={`tel:${profile.phone.replace(/\s/g, '')}`}>Phone</a>
           <a href={profile.linkedin} target="_blank" rel="noreferrer">
             LinkedIn
           </a>
           <a href={profile.github} target="_blank" rel="noreferrer">
             GitHub
           </a>
-          {/* Booking Demo — replace localhost with deployed API URL when hosting */}
         </div>
+        <p className="contact-secondary">
+          <a href={profile.telegram} target="_blank" rel="noreferrer">
+            Telegram
+          </a>
+          <span className="contact-dot" aria-hidden="true">
+            ·
+          </span>
+          <a href={profile.whatsapp} target="_blank" rel="noreferrer">
+            WhatsApp
+          </a>
+          <span className="contact-dot" aria-hidden="true">
+            ·
+          </span>
+          <a href={profile.portfolioRepo} target="_blank" rel="noreferrer">
+            Portfolio source
+          </a>
+        </p>
       </section>
 
         <footer className="footer">
           <p>
-            Built by {profile.name} · Based in {profile.location}
+            © {new Date().getFullYear()} {profile.name} · {profile.location} · React &amp; Vite
           </p>
         </footer>
       </main>
@@ -721,6 +953,8 @@ function App() {
           </svg>
         )})()}
       </div>
+
+      {activeDemo && <ProjectModal project={activeDemo} onClose={() => setActiveDemo(null)} />}
     </>
   )
 }
