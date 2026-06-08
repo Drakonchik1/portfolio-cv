@@ -89,9 +89,9 @@ const profile = {
 }
 
 const heroKpis = [
-  { value: '104', label: 'xUnit tests in FlowBoard' },
-  { value: '1 yr', label: 'C# & SQL in industry (Techcom)' },
-  { value: '3', label: 'shipped surfaces — API · WPF · full-stack' },
+  { value: '104', label: 'xUnit tests (FlowBoard)' },
+  { value: '1 yr', label: 'C# & SQL — Techcom' },
+  { value: '3×', label: 'API · WPF · full-stack' },
 ]
 
 const currentlyBuilding = {
@@ -135,12 +135,9 @@ const experiencePosts = [
     period: '02/2023 – 01/2024',
     location: 'Tychy, Poland',
     bullets: [
-      'Developed and maintained backend features in C# — bug fixes, small modules, and API/data-layer changes',
-      'Wrote and updated SQL queries (SELECT/INSERT/UPDATE) for reports, lists, and admin-style data operations',
-      'Worked with relational databases — table design basics, joins, and keeping data consistent with app logic',
-      'Fixed backend defects from testing/production; traced issues from UI/API down to SQL when needed',
-      'Used Git for version control; deployed or tested changes with the team in short iterations',
-      'Collaborated with frontend on integration — clarified endpoints, payloads, and error cases',
+      'Backend features in C# — API/data-layer changes, modules, and bug fixes',
+      'SQL (SELECT/INSERT/UPDATE) for reports, lists, and admin data operations',
+      'Git in short iterations; aligned with frontend on endpoints and error payloads',
     ],
   },
   {
@@ -149,10 +146,9 @@ const experiencePosts = [
     period: '03/2025 – 04/2025',
     location: 'Madrid, Spain',
     bullets: [
-      'Supported live educational sessions using VR headsets in a professional IT environment',
-      'Prepared, configured, and tested VR equipment before each session',
-      'Worked with an experienced IT support team — troubleshooting issues and keeping sessions on schedule',
-      'Gained hands-on familiarity with VR hardware setup, calibration, and day-to-day operational workflows',
+      'Prepared and tested VR headsets before live educational sessions',
+      'Troubleshot issues with IT team during session delivery',
+      'VR hardware setup, calibration, and day-to-day operations',
     ],
   },
 ]
@@ -179,6 +175,7 @@ const projectPosts = [
     stack: '.NET 10 · ASP.NET Core · EF Core · SQL Server · Docker',
     category: 'Backend',
     status: 'In progress',
+    proof: 'GitHub · 104 tests · CI',
     link: 'https://github.com/Drakonchik1/FlowBoard',
     demo: {
       type: 'api',
@@ -210,6 +207,7 @@ Domain → Application (MediatR + FluentValidation)
       'ASP.NET Core CRUD API with filtering, sorting, pagination, validation, global exception middleware, and EF Core + SQLite.',
     stack: '.NET 10 · ASP.NET Core · EF Core · SQLite · Swagger',
     category: 'Backend',
+    proof: 'Runnable · Swagger',
     link: 'https://github.com/Drakonchik1',
     demo: {
       type: 'api',
@@ -236,6 +234,7 @@ Domain → Application (MediatR + FluentValidation)
       'Full-stack booking app: overlap detection, status workflow (Scheduled → Confirmed → Completed), ASP.NET Core API + vanilla JS UI.',
     stack: 'ASP.NET Core · EF Core · SQLite · JavaScript',
     category: 'Full-Stack',
+    proof: 'Runnable · UI + API',
     link: 'https://github.com/Drakonchik1',
     demo: {
       type: 'api',
@@ -263,6 +262,7 @@ Domain → Application (MediatR + FluentValidation)
       'WPF desktop dashboard — OpenWeatherMap + IMGW APIs, charts, date filters, CSV export, async HTTP with cancellation-friendly loading.',
     stack: '.NET 8 · WPF · REST APIs',
     category: 'Desktop',
+    proof: 'WPF · dual weather APIs',
     link: 'https://github.com/Drakonchik1',
     demo: {
       type: 'app',
@@ -286,6 +286,7 @@ Domain → Application (MediatR + FluentValidation)
       'Read-only Windows health checker — modular diagnostic pipeline, EF Core SQLite scan history, multi-agent AI council for repair guides.',
     stack: '.NET 10 · WPF · MVVM · EF Core SQLite',
     category: 'Desktop',
+    proof: 'Runnable · dotnet run',
     link: 'https://github.com/Drakonchik1',
     demo: {
       type: 'app',
@@ -535,6 +536,15 @@ function ParticleField({ season }) {
 
     const canvas = canvasRef.current
     if (!canvas) return
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reducedMotion) {
+      const ctx0 = canvas.getContext('2d', { alpha: true })
+      if (ctx0) {
+        ctx0.clearRect(0, 0, canvas.width, canvas.height)
+      }
+      return
+    }
 
     const wrap = canvas.closest('.particle-season-wrap')
     wrap?.querySelectorAll('canvas.snow-field').forEach((c) => {
@@ -956,7 +966,11 @@ function App() {
         <SeasonVisualLayer season={season} viewport={viewport} />
       </div>
 
-      <main className="page">
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
+
+      <main className="page" id="main-content">
         <div className="bg-glow bg-glow-left" />
         <div className="bg-glow bg-glow-right" />
 
@@ -1016,6 +1030,14 @@ function App() {
               Telegram
             </a>
           </div>
+          <div className="hero-cta">
+            <a className="hero-cta-primary" href="#projects">
+              View projects
+            </a>
+            <a className="hero-cta-secondary" href={profile.github} target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+          </div>
         </div>
         <aside className="hero-side">
           <p className="eyebrow">At a glance</p>
@@ -1072,6 +1094,7 @@ function App() {
                 <h3>{post.title}</h3>
                 <p>{post.excerpt}</p>
                 <p className="meta-line">{post.stack}</p>
+                {post.proof && <p className="proof-line">{post.proof}</p>}
                 <div className="feed-actions">
                   {post.link !== '#' && (
                     <a className="read-more" href={post.link} target="_blank" rel="noreferrer">

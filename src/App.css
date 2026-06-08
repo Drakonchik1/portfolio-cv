@@ -40,6 +40,23 @@
   margin-top: -1px;
 }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.5rem;
+  z-index: 100;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  background: #0b2a42;
+  color: #e8f6ff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.skip-link:focus {
+  left: 0.75rem;
+}
+
 .page {
   position: relative;
   z-index: 3;
@@ -526,9 +543,58 @@
 }
 
 .kpi-label {
-  margin: 0.12rem 0 0;
-  color: #b5cfe8;
-  font-size: 0.76rem;
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #a8cce8;
+}
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.hero-cta-primary,
+.hero-cta-secondary {
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 140ms, border-color 140ms;
+}
+
+.hero-cta-primary {
+  background: rgba(120, 200, 255, 0.22);
+  border: 1px solid rgba(160, 220, 255, 0.45);
+  color: #e8f7ff;
+}
+
+.hero-cta-secondary {
+  background: transparent;
+  border: 1px solid rgba(160, 220, 255, 0.28);
+  color: #b8ddf5;
+}
+
+.hero-cta-primary:hover,
+.hero-cta-secondary:hover {
+  background: rgba(120, 200, 255, 0.32);
+}
+
+.proof-line {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: #8fd4a8;
+  font-weight: 600;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(140, 210, 255, 0.85);
+  outline-offset: 2px;
 }
 
 .availability {
