@@ -21,6 +21,56 @@ function cancelParticleRaf() {
   __particleRafId = 0
 }
 
+/** Layout + visual viewport — keeps fixed decor aligned when browser zoom changes. */
+function readDecorViewport() {
+  const vv = window.visualViewport
+  if (!vv) {
+    return {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      scale: 1,
+      offsetLeft: 0,
+      offsetTop: 0,
+    }
+  }
+  return {
+    width: vv.width,
+    height: vv.height,
+    scale: vv.scale,
+    offsetLeft: vv.offsetLeft,
+    offsetTop: vv.offsetTop,
+  }
+}
+
+function useDecorViewport() {
+  const [viewport, setViewport] = useState(readDecorViewport)
+
+  useEffect(() => {
+    const sync = () => setViewport(readDecorViewport())
+    sync()
+    window.addEventListener('resize', sync, { passive: true })
+    const vv = window.visualViewport
+    vv?.addEventListener('resize', sync)
+    vv?.addEventListener('scroll', sync)
+    return () => {
+      window.removeEventListener('resize', sync)
+      vv?.removeEventListener('resize', sync)
+      vv?.removeEventListener('scroll', sync)
+    }
+  }, [])
+
+  useEffect(() => {
+    const root = document.documentElement.style
+    root.setProperty('--decor-vw', `${viewport.width}px`)
+    root.setProperty('--decor-vh', `${viewport.height}px`)
+    root.setProperty('--decor-scale', String(viewport.scale))
+    root.setProperty('--decor-ox', `${viewport.offsetLeft}px`)
+    root.setProperty('--decor-oy', `${viewport.offsetTop}px`)
+  }, [viewport])
+
+  return viewport
+}
+
 // ─── Season System ────────────────────────────────────────────────────────────
 const SEASON_CONFIG = {
   winter: {
@@ -488,7 +538,8 @@ const SEASON_PLACEMENT = {
 
 const AMBIENT_ROT_SEED = { winter: 0xa11b001, spring: 0xa11b002, summer: 0xa11b003, autumn: 0xa11b004 }
 
-function AmbientRotors({ season }) {
+function AmbientRotors({ season, scale = 1 }) {
+  const sizeScale = Math.min(Math.max(scale, 0.75), 2)
   const items = useMemo(() => {
     const rng = lcg(AMBIENT_ROT_SEED[season])
     const n = 16
@@ -496,12 +547,12 @@ function AmbientRotors({ season }) {
       id: `${season}-ar-${i}`,
       topPct: 4 + rng() * 90,
       leftPct: 2 + rng() * 96,
-      px: 20 + Math.floor(rng() * 58),
+      px: (20 + Math.floor(rng() * 58)) * sizeScale,
       sec: 18 + rng() * 36,
       rev: rng() > 0.47,
       dashed: rng() > 0.52,
     }))
-  }, [season])
+  }, [season, sizeScale])
 
   return (
     <div className="ambient-rotors" aria-hidden="true">
@@ -547,12 +598,17 @@ function ParticleField({ season }) {
     }
 
     const wrap = canvas.closest('.particle-season-wrap')
-    wrap?.querySelectorAll('canvas.snow-field').forEach((c) => {
+    if (!wrap) return
+    wrap.querySelectorAll('canvas.snow-field').forEach((c) => {
       if (c !== canvas) c.remove()
     })
-    const w0 = window.innerWidth
-    const h0 = window.innerHeight
-    // Reset bitmap so no previous season pixels linger on the same element
+
+    const readCanvasSize = () => ({
+      w: Math.max(1, Math.round(wrap.clientWidth)),
+      h: Math.max(1, Math.round(wrap.clientHeight)),
+    })
+
+    const { w: w0, h: h0 } = readCanvasSize()
     canvas.width = w0
     canvas.height = h0
     const ctx = canvas.getContext('2d', { alpha: true })
@@ -605,12 +661,9 @@ function ParticleField({ season }) {
       }
     }
 
-    seedParticles()
-
-    const resize = () => {
+    const applyCanvasSize = () => {
       if (session !== __particleCanvasSession) return
-      const w = window.innerWidth
-      const h = window.innerHeight
+      const { w, h } = readCanvasSize()
       const dimsChanged = canvas.width !== w || canvas.height !== h
       if (dimsChanged) {
         canvas.width = w
@@ -621,7 +674,10 @@ function ParticleField({ season }) {
       }
     }
 
-    window.addEventListener('resize', resize, { passive: true })
+    seedParticles()
+
+    const resizeObserver = new ResizeObserver(() => applyCanvasSize())
+    resizeObserver.observe(wrap)
 
     // Pick once per season — avoids branching inside the hot loop (hundreds of particles × 60fps)
     const drawParticle =
@@ -742,7 +798,7 @@ function ParticleField({ season }) {
       alive = false
       document.removeEventListener('visibilitychange', onVisibility)
       cancelParticleRaf()
-      window.removeEventListener('resize', resize)
+      resizeObserver.disconnect()
       try {
         if (canvas.width > 0 && canvas.height > 0) {
           ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -768,7 +824,10 @@ function SideDecorations({ viewport, season }) {
       setMouse({ x: latest.x, y: latest.y })
     }
     const onMove = (e) => {
-      latest = { x: e.clientX, y: e.clientY }
+      latest = {
+        x: e.clientX - viewport.offsetLeft,
+        y: e.clientY - viewport.offsetTop,
+      }
       if (!raf) raf = requestAnimationFrame(flush)
     }
     window.addEventListener('pointermove', onMove, { passive: true })
@@ -776,14 +835,15 @@ function SideDecorations({ viewport, season }) {
       window.removeEventListener('pointermove', onMove)
       cancelAnimationFrame(raf)
     }
-  }, [])
+  }, [viewport.offsetLeft, viewport.offsetTop])
 
   // Rejection-sampling packer: place each decoration randomly, retry if it
   // overlaps anything already placed (using actual pixel distances).
   const flakes = useMemo(() => {
-    const { width: W, height: H } = viewport
+    const { width: W, height: H, scale } = viewport
     if (!W || !H) return []
 
+    const sizeScale = Math.min(Math.max(scale, 0.75), 2)
     const cfg   = SEASON_PLACEMENT[season]
     const SEEDS = { winter: 0x5f3759, spring: 0x9a2b1c, summer: 0x4e7f3d, autumn: 0xb3c921 }
     const rng   = lcg(SEEDS[season])
@@ -793,7 +853,7 @@ function SideDecorations({ viewport, season }) {
     let id = 0
 
     for (let i = 0; i < cfg.count; i++) {
-      const size = cfg.minSz + rng() * (cfg.maxSz - cfg.minSz)
+      const size = (cfg.minSz + rng() * (cfg.maxSz - cfg.minSz)) * sizeScale
       const r    = size * 0.5 * cfg.gap   // collision radius (includes padding)
 
       let ok = false
@@ -822,7 +882,7 @@ function SideDecorations({ viewport, season }) {
       // If 60 attempts all collided, that decoration is simply skipped
     }
     return out
-  }, [season, viewport.width, viewport.height])
+  }, [season, viewport.width, viewport.height, viewport.scale])
 
   return (
     <div className="side-snowflakes season-deco-enter" aria-hidden="true">
@@ -879,7 +939,7 @@ function SeasonVisualLayer({ season, viewport }) {
         <ParticleField season={season} />
       </div>
       <div key={season} className="season-decor-layer">
-        <AmbientRotors season={season} />
+        <AmbientRotors season={season} scale={viewport.scale} />
         <SideDecorations viewport={viewport} season={season} />
       </div>
     </div>
@@ -889,7 +949,7 @@ function SeasonVisualLayer({ season, viewport }) {
 function App() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [activeDemo, setActiveDemo] = useState(null)
-  const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight })
+  const viewport = useDecorViewport()
   const [season, setSeason] = useState(autoSeason)
   // true = user manually chose a season (overrides auto-sync)
   const [userPicked, setUserPicked] = useState(false)
@@ -922,22 +982,6 @@ function App() {
     root.style.setProperty('--season-glow-inner', cfg.glowInner)
     root.style.setProperty('--season-glow-outer', cfg.glowOuter)
   }, [season])
-
-  useEffect(() => {
-    let debounceId = 0
-    const onResize = () => {
-      window.clearTimeout(debounceId)
-      debounceId = window.setTimeout(() => {
-        setViewport({ width: window.innerWidth, height: window.innerHeight })
-      }, 120)
-    }
-
-    window.addEventListener('resize', onResize, { passive: true })
-    return () => {
-      window.clearTimeout(debounceId)
-      window.removeEventListener('resize', onResize)
-    }
-  }, [])
 
   const filteredPosts = useMemo(() => {
     if (activeCategory === 'All') {

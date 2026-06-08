@@ -4,13 +4,17 @@
   z-index: 0;
 }
 
-/* Portal target: fixed overlay between peaks and main content */
+/* Portal target: fixed overlay — tracks visualViewport when browser zoom changes */
 #season-visual-portal.season-visual-mount,
 .season-visual-mount {
   position: fixed;
-  inset: 0;
+  left: var(--decor-ox, 0);
+  top: var(--decor-oy, 0);
+  width: var(--decor-vw, 100vw);
+  height: var(--decor-vh, 100vh);
   pointer-events: none;
   z-index: 2;
+  overflow: hidden;
 }
 
 /* Full-width mountain bands that scroll with the page */
@@ -31,12 +35,12 @@
 }
 
 .mtn-band-top {
-  height: 380px;
+  height: clamp(16rem, 24vw, 23.75rem);
   margin-bottom: -1px;
 }
 
 .mtn-band-bottom {
-  height: 380px;
+  height: clamp(16rem, 24vw, 23.75rem);
   margin-top: -1px;
 }
 
@@ -122,8 +126,10 @@
 
 /* Fills .season-visual-mount (fixed z-2 between peaks and .page) */
 .season-visual-root {
-  position: fixed;
+  position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
   isolation: isolate;
@@ -149,6 +155,8 @@
 .snow-field {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
@@ -367,16 +375,16 @@
 .bg-glow {
   position: absolute;
   z-index: 0;
-  width: 420px;
-  height: 420px;
+  width: calc(26.25rem * var(--decor-scale, 1));
+  height: calc(26.25rem * var(--decor-scale, 1));
   border-radius: 50%;
-  filter: blur(78px);
+  filter: blur(calc(4.875rem * var(--decor-scale, 1)));
   pointer-events: none;
 }
 
 .bg-glow-left {
-  left: -150px;
-  top: -120px;
+  left: calc(-9.375rem * var(--decor-scale, 1));
+  top: calc(-7.5rem * var(--decor-scale, 1));
   background: radial-gradient(
     circle,
     var(--season-glow-inner, rgba(122, 201, 255, 0.26)) 0%,
@@ -386,8 +394,8 @@
 }
 
 .bg-glow-right {
-  right: -170px;
-  top: 120px;
+  right: calc(-10.625rem * var(--decor-scale, 1));
+  top: calc(7.5rem * var(--decor-scale, 1));
   background: radial-gradient(
     circle,
     var(--season-glow-outer, rgba(180, 226, 255, 0.22)) 0%,
