@@ -600,14 +600,98 @@
   background: rgba(214, 237, 255, 0.05);
 }
 
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.42rem;
+}
+
 .post-tag {
   display: inline-block;
-  margin-bottom: 0.42rem;
   border-radius: 999px;
   border: 1px solid rgba(192, 230, 255, 0.36);
   color: #9ae3ff;
   font-size: 0.74rem;
   padding: 0.15rem 0.5rem;
+}
+
+.post-tag--status {
+  border-color: rgba(255, 210, 130, 0.45);
+  color: #ffd68a;
+}
+
+.experience-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.experience-item {
+  border: 1px solid rgba(199, 230, 255, 0.18);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  background: rgba(214, 237, 255, 0.04);
+}
+
+.experience-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.experience-item h3 {
+  margin: 0;
+  color: #f3fbff;
+  font-size: 1.02rem;
+}
+
+.experience-org {
+  margin: 0.25rem 0 0;
+  color: #b7d5ed;
+  font-size: 0.9rem;
+}
+
+.experience-date {
+  color: #9ae3ff;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.experience-bullets {
+  margin: 0.55rem 0 0;
+  padding-left: 1.15rem;
+  color: #d4e8f9;
+}
+
+.experience-bullets li {
+  margin-bottom: 0.28rem;
+}
+
+.education-school {
+  margin: 0;
+  color: #f3fbff;
+  font-weight: 600;
+}
+
+.education-meta {
+  margin: 0.35rem 0 0;
+  color: #b7d5ed;
+  font-size: 0.9rem;
+}
+
+.education-certs,
+.language-list {
+  margin: 0.55rem 0 0;
+  padding-left: 1.1rem;
+  color: #d4e8f9;
+  font-size: 0.9rem;
+}
+
+.education-certs li,
+.language-list li {
+  margin-bottom: 0.25rem;
 }
 
 .feed-item h3 {

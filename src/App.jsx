@@ -74,7 +74,7 @@ function autoSeason() {
 
 const profile = {
   name: 'Pavlo Dorofieiev',
-  role: '.NET developer · APIs, WPF, MAUI, and web where it fits',
+  role: 'Junior .NET developer · ASP.NET Core, EF Core, WPF',
   location: 'Tychy, Poland',
   email: 'pavlo.dorofieiev@gmail.com',
   phone: '+48 576 468 614',
@@ -85,155 +85,198 @@ const profile = {
   telegram: 'https://t.me/Drakon_v2',
   whatsapp: 'https://wa.me/48576468614',
   summary:
-    "I work mostly in C#: ASP.NET Core for APIs, WPF for desktop, MAUI when the same codebase needs to hit mobile. I keep layouts and naming straightforward so teammates can find things quickly, return errors that are useful in logs, and use async properly so the UI stays responsive during I/O.",
+    'Junior .NET developer focused on ASP.NET Core, EF Core, and WPF. Shipped a booking API, WPF weather dashboard, and PatchGuard diagnostics desktop tool. INF.03 / INF.04 — 100% practice. Open to remote work or hybrid in Silesia.',
 }
 
-const techStack = ['C#', '.NET', 'ASP.NET Core', 'EF Core', 'SQLite', 'WPF', 'MAUI', 'React', 'REST APIs']
-const categories = ['All', 'Backend', 'Full-Stack', 'Desktop', 'Mobile']
+const techStack = [
+  'C#',
+  '.NET 8/10',
+  'ASP.NET Core',
+  'EF Core',
+  'SQL / SQLite',
+  'REST APIs',
+  'JWT',
+  'WPF / MVVM',
+  'Swagger / Scalar',
+  'Git',
+  'xUnit',
+  'Docker (basics)',
+]
+
+const categories = ['All', 'Backend', 'Full-Stack', 'Desktop']
+
+const experiencePosts = [
+  {
+    company: 'Techcom',
+    role: 'Programmer',
+    period: '02/2023 – 01/2024',
+    location: 'Tychy, Poland',
+    bullets: [
+      'Developed and maintained backend features in C# — bug fixes, small modules, and API/data-layer changes',
+      'Wrote and updated SQL queries (SELECT/INSERT/UPDATE) for reports, lists, and admin-style data operations',
+      'Worked with relational databases — table design basics, joins, and keeping data consistent with app logic',
+      'Fixed backend defects from testing/production; traced issues from UI/API down to SQL when needed',
+      'Used Git for version control; deployed or tested changes with the team in short iterations',
+      'Collaborated with frontend on integration — clarified endpoints, payloads, and error cases',
+    ],
+  },
+  {
+    company: 'IE University',
+    role: 'VR/IT Support (Erasmus Internship)',
+    period: '03/2025 – 04/2025',
+    location: 'Madrid, Spain',
+    bullets: [
+      'Supported live educational sessions using VR headsets in a professional IT environment',
+      'Prepared, configured, and tested VR equipment before each session',
+      'Worked with an experienced IT support team — troubleshooting issues and keeping sessions on schedule',
+      'Gained hands-on familiarity with VR hardware setup, calibration, and day-to-day operational workflows',
+    ],
+  },
+]
+
+const education = {
+  school: 'TEB Technikum Edukacja w Tychach',
+  program: 'Programmer — Information Technology',
+  period: '2020 – 2026',
+  certificates: ['INF.03 — 100% practice', 'INF.04 — 100% practice'],
+}
+
+const languages = [
+  'Ukrainian — native',
+  'Russian — native',
+  'English — C1',
+  'Polish — C1',
+]
 
 const projectPosts = [
   {
-    title: 'TaskManagerAPI: Production-Style Task Backend',
+    title: 'FlowBoard: Flagship Backend (in progress)',
     excerpt:
-      'A complete ASP.NET Core task API with filtering, pagination, sorting, validation, global exception handling, and SQLite persistence.',
-    stack: 'ASP.NET Core · EF Core · SQLite · Swagger',
+      'Multi-user project management API — Clean Architecture, JWT refresh-token rotation, workspaces with RBAC, CQRS with MediatR, 104 xUnit tests.',
+    stack: '.NET 10 · ASP.NET Core · EF Core · SQL Server · Docker',
     category: 'Backend',
-    link: '#',
+    status: 'In progress',
+    link: 'https://github.com/Drakonchik1/FlowBoard',
     demo: {
       type: 'api',
       endpoints: [
-        { method: 'GET',    path: '/api/tasks',      desc: 'List tasks — filter by status/priority, sort, paginate' },
-        { method: 'POST',   path: '/api/tasks',      desc: 'Create task with validation' },
-        { method: 'PUT',    path: '/api/tasks/{id}', desc: 'Update title, priority, progress' },
+        { method: 'POST', path: '/api/auth/register', desc: 'Register user — BCrypt hashing, rate limited' },
+        { method: 'POST', path: '/api/auth/login', desc: 'JWT access + refresh token (family-based rotation)' },
+        { method: 'POST', path: '/api/workspaces', desc: 'Create workspace — Owner role assigned' },
+        { method: 'POST', path: '/api/workspaces/{id}/invites', desc: 'Invite member — RBAC: Owner / Admin / Member' },
+      ],
+      sample: `// Clean Architecture layers
+Domain → Application (MediatR + FluentValidation)
+       → Infrastructure (EF Core, JWT, BCrypt)
+       → API (Scalar docs, health checks, rate limiting)
+
+// 104 xUnit tests — handlers + domain entities
+// Docker Compose for local SQL Server`,
+      highlights: [
+        'Clean Architecture — Domain / Application / Infrastructure / API',
+        'JWT + family-based refresh-token rotation, BCrypt, auth rate limiting',
+        'Multi-tenant workspaces, invites, RBAC (Owner / Admin / Member)',
+        'CQRS with MediatR + FluentValidation; Scalar/OpenAPI docs',
+        '104 xUnit tests; Docker Compose for local SQL Server',
+      ],
+    },
+  },
+  {
+    title: 'TaskManagerAPI: REST Task Backend',
+    excerpt:
+      'ASP.NET Core CRUD API with filtering, sorting, pagination, validation, global exception middleware, and EF Core + SQLite.',
+    stack: '.NET 10 · ASP.NET Core · EF Core · SQLite · Swagger',
+    category: 'Backend',
+    link: 'https://github.com/Drakonchik1',
+    demo: {
+      type: 'api',
+      endpoints: [
+        { method: 'GET', path: '/api/tasks', desc: 'List tasks — filter, sort, paginate' },
+        { method: 'POST', path: '/api/tasks', desc: 'Create task with validation' },
+        { method: 'PUT', path: '/api/tasks/{id}', desc: 'Update title, priority, progress' },
         { method: 'DELETE', path: '/api/tasks/{id}', desc: 'Remove task' },
       ],
-      sample: `// GET /api/tasks?status=InProgress&priority=High&page=1
-{
-  "items": [
-    {
-      "id": 3,
-      "title": "Fix authentication middleware",
-      "priority": "High",
-      "status": "InProgress",
-      "createdAt": "2024-03-10T09:15:00Z",
-      "dueDate": "2024-03-15T18:00:00Z"
-    }
-  ],
-  "totalCount": 8,
-  "page": 1,
-  "pageSize": 10,
-  "totalPages": 1
-}`,
+      sample: `// Runnable via dotnet run — Swagger UI in README
+// Global exception middleware → consistent JSON errors
+// Enums serialized as strings (JsonStringEnumConverter)`,
       highlights: [
-        'Global exception middleware — consistent error envelope',
-        'Pagination + multi-field sorting on every list endpoint',
-        'Enum serialized as strings (JsonStringEnumConverter)',
-        'EF Core query optimisation with compiled indexes',
+        'REST CRUD with filtering, sorting, and pagination',
+        'Input validation + global exception middleware',
+        'EF Core + SQLite with seed data',
+        'Swagger/OpenAPI for interactive testing',
       ],
     },
   },
   {
-    title: 'BookingSystemAPI: Full Booking Application',
+    title: 'Booking System Application',
     excerpt:
-      'A full-stack booking app with conflict detection, status workflows, seeded data, API endpoints, and integrated web UI.',
+      'Full-stack booking app: overlap detection, status workflow (Scheduled → Confirmed → Completed), ASP.NET Core API + vanilla JS UI.',
     stack: 'ASP.NET Core · EF Core · SQLite · JavaScript',
     category: 'Full-Stack',
-    link: '#',
+    link: 'https://github.com/Drakonchik1',
     demo: {
       type: 'api',
       endpoints: [
-        { method: 'GET',   path: '/api/catalog',           desc: 'Browse providers and service types' },
-        { method: 'POST',  path: '/api/bookings',          desc: 'Create booking — conflict detection included' },
-        { method: 'PATCH', path: '/api/bookings/{id}/status', desc: 'Advance status: Pending → Confirmed → Completed' },
-        { method: 'DELETE',path: '/api/bookings/{id}',     desc: 'Cancel booking' },
+        { method: 'GET', path: '/api/catalog', desc: 'Browse providers and service types' },
+        { method: 'POST', path: '/api/bookings', desc: 'Create booking — conflict detection included' },
+        { method: 'PATCH', path: '/api/bookings/{id}/status', desc: 'Advance: Scheduled → Confirmed → Completed' },
+        { method: 'DELETE', path: '/api/bookings/{id}', desc: 'Cancel booking' },
       ],
-      sample: `// POST /api/bookings
-{
-  "serviceTypeId": 2,
-  "providerId": 1,
-  "clientName": "Anna Kowalska",
-  "startTime": "2024-04-20T10:00:00",
-  "endTime":   "2024-04-20T11:00:00"
-}
+      sample: `// 409 Conflict if slot is already taken:
+{ "error": "Time slot is already booked for this provider." }
 
-// 409 Conflict if slot is already taken:
-{
-  "error": "Time slot is already booked for this provider."
-}`,
+// UI + Swagger both run from one dotnet run`,
       highlights: [
-        'Overlap detection: rejects double-bookings at service layer',
-        'Status machine: Pending → Confirmed → Completed / Cancelled',
-        'Integrated vanilla JS front-end served from wwwroot',
-        'Seeded catalog (providers + service types) on first run',
+        'Overlap detection — service-layer validation before save',
+        'Status workflow: Scheduled → Confirmed → Completed',
+        'Vanilla JS UI in wwwroot wired to the API',
+        'Seeded catalog on first run',
       ],
     },
   },
   {
-    title: 'WeatherApp: API-Driven Desktop Analytics',
+    title: 'WeatherApp: WPF Weather Dashboard',
     excerpt:
-      'Desktop weather dashboard with OpenWeatherMap + IMGW integration, data source tracking, date filters, and CSV export.',
-    stack: '.NET 8 · WPF · REST APIs · JSON',
+      'WPF desktop dashboard — OpenWeatherMap + IMGW APIs, charts, date filters, CSV export, async HTTP with cancellation-friendly loading.',
+    stack: '.NET 8 · WPF · REST APIs',
     category: 'Desktop',
-    link: '#',
+    link: 'https://github.com/Drakonchik1',
     demo: {
       type: 'app',
       screens: [
-        { label: 'Dashboard',    desc: 'Live temperature, humidity, wind speed and pressure charts updated every 15 min.' },
-        { label: 'Date Filter',  desc: 'Custom date range picker — loads historical data from both OpenWeatherMap and IMGW APIs.' },
-        { label: 'Data Sources', desc: 'Toggle between sources; side-by-side comparison mode shows API discrepancies.' },
-        { label: 'CSV Export',   desc: 'One-click export of the current view to a spreadsheet-ready CSV file.' },
+        { label: 'Dashboard', desc: 'Charts for temperature, humidity, pressure, rainfall' },
+        { label: 'Dual APIs', desc: 'OpenWeatherMap + IMGW (Polish public weather data)' },
+        { label: 'Date Filter', desc: 'Historical samples with async, cancellation-friendly loading' },
+        { label: 'CSV Export', desc: 'Export current dataset with source label per row' },
       ],
       highlights: [
-        'Dual API integration — OpenWeatherMap + Polish IMGW',
-        'MVVM pattern with data-binding throughout',
-        'Async fetch with cancellation tokens (no UI freeze)',
-        'Auto-retry on network failure with exponential back-off',
+        'Dual API integration — OpenWeatherMap + IMGW',
+        'Async HTTP with cancellation-friendly loading',
+        'Date filter for historical samples',
+        'CSV export with per-row API source label',
       ],
     },
   },
   {
-    title: 'Budzik: Cross-Platform Alarm Scheduler',
+    title: 'PatchGuard: WPF Diagnostics Desktop',
     excerpt:
-      'Alarm application featuring Android notification channels, exact scheduling behavior, and platform-specific implementation details.',
-    stack: '.NET MAUI · C# · Android APIs',
-    category: 'Mobile',
-    link: '#',
+      'Read-only Windows health checker — modular diagnostic pipeline, EF Core SQLite scan history, multi-agent AI council for repair guides.',
+    stack: '.NET 10 · WPF · MVVM · EF Core SQLite',
+    category: 'Desktop',
+    link: 'https://github.com/Drakonchik1',
     demo: {
       type: 'app',
       screens: [
-        { label: 'Alarm List',   desc: 'All alarms with next-trigger time, enable/disable toggle and swipe-to-delete.' },
-        { label: 'Add Alarm',    desc: 'Time picker, repeat pattern (once / daily / weekdays) and custom label.' },
-        { label: 'Notification', desc: 'Heads-up notification with Dismiss and Snooze actions, exact scheduling via AlarmManager.' },
-        { label: 'Settings',     desc: 'Default snooze duration, ringtone selection, vibration toggle.' },
+        { label: 'Scan', desc: 'Modular diagnostics — Event Log, updates, services, disk space' },
+        { label: 'History', desc: 'EF Core SQLite scan history with MVVM + DI' },
+        { label: 'AI Council', desc: 'Analyze → research → debate → chief verdict for manual repair steps' },
+        { label: 'Guides', desc: 'Structured repair guides — read-only, no admin elevation' },
       ],
       highlights: [
-        'Android AlarmManager.setExactAndAllowWhileIdle for precision',
-        'Notification channels with importance levels (API 26+)',
-        'Background service survives app close and device restart',
-        'Platform-specific code via MAUI dependency injection',
-      ],
-    },
-  },
-  {
-    title: 'ReflexGame: Event-Driven Mobile Logic',
-    excerpt:
-      'Reaction game with robust state transitions, timer mechanics, false-start detection, and persistent local ranking.',
-    stack: '.NET MAUI · C# · UX State Logic',
-    category: 'Mobile',
-    link: '#',
-    demo: {
-      type: 'app',
-      screens: [
-        { label: 'Ready Screen', desc: 'Countdown before the stimulus — random delay 1–4 s prevents anticipation.' },
-        { label: 'Reaction',     desc: 'Tap as fast as possible after the green flash. Timer precision: ±1 ms.' },
-        { label: 'False Start',  desc: 'Tap before the stimulus → penalty round displayed with explanation.' },
-        { label: 'Leaderboard',  desc: 'Top 10 personal scores stored with SQLite, sortable by date or time.' },
-      ],
-      highlights: [
-        'Finite state machine: Idle → Waiting → Active → Result → Ranked',
-        'CancellationToken-backed timer — no leaking async operations',
-        'False-start detection with ≤ 100 ms threshold',
-        'Persistent local ranking via SQLite + EF Core',
+        'Read-only Windows diagnostics (Event Log, updates, services, disk)',
+        'MVVM + DI + EF Core SQLite scan history',
+        'Modular diagnostic pipeline',
+        'Multi-agent AI council for manual repair guides — dotnet run from README',
       ],
     },
   },
@@ -242,24 +285,24 @@ const projectPosts = [
 const approachPillars = [
   {
     title: 'Backends',
-    body: "I validate input before it wanders too deep. If something throws, I'd rather the client gets a clear JSON message than a silent 500.",
+    body: 'Clean Architecture where it pays off — validate early, consistent JSON errors, EF Core queries that do not surprise you in production.',
   },
   {
-    title: 'Desktop & phones',
-    body: 'WPF and MAUI taught me to watch async/await and the UI thread — the boring stuff that stops windows from locking up mid-request.',
+    title: 'Desktop',
+    body: 'WPF with MVVM: async I/O off the UI thread, charts that reflect real API data, diagnostics that stay read-only and safe.',
   },
   {
-    title: 'Git history',
-    body: 'I split work into smaller commits when I can. Makes it easier for someone else to read, and easier for me to roll back a bad idea.',
+    title: 'Team habits',
+    body: 'Git in short iterations, trace bugs from UI down to SQL, clarify API contracts with frontend — same rhythm as Techcom.',
   },
 ]
 
 const technicalFocus = [
-  'EF Core — trying not to trip over N+1 queries',
-  'Booking logic and “this slot is already taken” cases',
-  'Two weather APIs in one WPF app without lying in the chart',
-  'Android alarms: channels, permissions, the usual headache',
-  'Lists with filters + paging that still behave',
+  'JWT + refresh-token rotation and auth rate limiting (FlowBoard)',
+  'Booking overlap detection and status workflows',
+  'Dual weather APIs in one WPF dashboard',
+  'CQRS with MediatR + FluentValidation pipelines',
+  'Lists with filters, sorting, and pagination on APIs',
 ]
 
 // ─── Koch fractal snowflake generator ────────────────────────────────────────
@@ -908,9 +951,9 @@ function App() {
             Pavlo.dev
           </p>
           <div className="top-links">
+            <a href="#experience">Experience</a>
+            <a href="#projects">Projects</a>
             <a href="#approach">Approach</a>
-            <a href="#projects">Work</a>
-            <a href="#categories">Filter</a>
             <a href="#contact">Contact</a>
           </div>
           <div className="season-picker" role="group" aria-label="Season theme">
@@ -941,7 +984,7 @@ function App() {
         <span className="card-rotor card-rotor--tl" aria-hidden="true" />
         <span className="card-rotor card-rotor--br" aria-hidden="true" />
         <div className="hero-main">
-          <p className="eyebrow">C#, APIs, desktop &amp; mobile</p>
+          <p className="eyebrow">Junior .NET · ASP.NET Core, EF Core, WPF</p>
           <h1>{profile.name}</h1>
           <p className="role">{profile.role}</p>
           <p className="summary">{profile.summary}</p>
@@ -954,28 +997,56 @@ function App() {
             <a href={profile.github} target="_blank" rel="noreferrer">
               GitHub
             </a>
+            <a href={profile.telegram} target="_blank" rel="noreferrer">
+              Telegram
+            </a>
           </div>
         </div>
         <aside className="hero-side">
-          <p className="eyebrow">Quick numbers</p>
+          <p className="eyebrow">At a glance</p>
           <div className="stats-grid">
             <article>
               <p className="kpi-value">5</p>
-              <p className="kpi-label">projects with demos on this page</p>
+              <p className="kpi-label">.NET projects (matches CV)</p>
             </article>
             <article>
-              <p className="kpi-value">.NET</p>
-              <p className="kpi-label">where I’m most at home</p>
+              <p className="kpi-value">100%</p>
+              <p className="kpi-label">INF.03 &amp; INF.04 practice</p>
             </article>
             <article>
-              <p className="kpi-value">mix</p>
-              <p className="kpi-label">APIs, WPF, MAUI, a bit of web</p>
+              <p className="kpi-value">C1</p>
+              <p className="kpi-label">English &amp; Polish</p>
             </article>
           </div>
           <p className="availability">
-            Based in Tychy. Hybrid nearby is fine; remote works if our hours overlap with CET reasonably well.
+            Open to remote work or hybrid in Silesia (Katowice area). Based in Tychy.
           </p>
         </aside>
+      </section>
+
+      <section className="card experience section-with-rotors" id="experience">
+        <span className="card-rotor card-rotor--tl" aria-hidden="true" />
+        <h2>Experience</h2>
+        <div className="experience-list">
+          {experiencePosts.map((job) => (
+            <article key={job.company + job.role} className="experience-item">
+              <div className="experience-head">
+                <div>
+                  <h3>{job.role}</h3>
+                  <p className="experience-org">
+                    {job.company} · {job.location}
+                  </p>
+                </div>
+                <span className="experience-date">{job.period}</span>
+              </div>
+              <ul className="experience-bullets">
+                {job.bullets.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="card approach section-with-rotors" id="approach">
@@ -1001,7 +1072,10 @@ function App() {
           <div className="feed-list">
             {filteredPosts.map((post) => (
               <article key={post.title} className="feed-item">
-                <span className="post-tag">{post.category}</span>
+                <div className="post-tags">
+                  <span className="post-tag">{post.category}</span>
+                  {post.status && <span className="post-tag post-tag--status">{post.status}</span>}
+                </div>
                 <h3>{post.title}</h3>
                 <p>{post.excerpt}</p>
                 <p className="meta-line">{post.stack}</p>
@@ -1041,6 +1115,18 @@ function App() {
           </section>
 
           <section className="card">
+            <h2>Education</h2>
+            <p className="education-school">{education.school}</p>
+            <p className="education-meta">{education.program}</p>
+            <p className="education-meta">{education.period}</p>
+            <ul className="education-certs">
+              {education.certificates.map((cert) => (
+                <li key={cert}>{cert}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="card">
             <h2>Stuff I’ve dug into</h2>
             <ol className="popular-list">
               {technicalFocus.map((item) => (
@@ -1058,14 +1144,23 @@ function App() {
               ))}
             </div>
           </section>
+
+          <section className="card">
+            <h2>Languages</h2>
+            <ul className="language-list">
+              {languages.map((lang) => (
+                <li key={lang}>{lang}</li>
+              ))}
+            </ul>
+          </section>
         </aside>
       </section>
 
       <section className="card cta" id="contact">
         <h2>Contact</h2>
         <p className="summary">
-          If you’re hiring for .NET, desktop, or MAUI work — or something close — email or LinkedIn is fine. I’ll
-          reply.
+          Hiring for junior .NET backend, full-stack, or WPF desktop? Remote or Silesia hybrid works. Email,
+          LinkedIn, or Telegram — I’ll reply.
         </p>
         <div className="chips">
           <a href={`mailto:${profile.email}`}>Email</a>
