@@ -690,8 +690,37 @@
 }
 
 .education-certs li,
-.language-list li {
+.language-list li,
+.building-list li,
+.looking-list li {
   margin-bottom: 0.25rem;
+}
+
+.building-list,
+.looking-list {
+  margin: 0.55rem 0 0;
+  padding-left: 1.1rem;
+  color: #d4e8f9;
+  font-size: 0.9rem;
+}
+
+.building-title {
+  margin: 0.35rem 0 0;
+  font-weight: 600;
+}
+
+.building-title a {
+  color: #9de5ff;
+  text-decoration: none;
+}
+
+.building-title a:hover {
+  text-decoration: underline;
+}
+
+.building-card {
+  border-color: rgba(255, 210, 130, 0.28);
+  background: rgba(255, 210, 130, 0.05);
 }
 
 .feed-item h3 {

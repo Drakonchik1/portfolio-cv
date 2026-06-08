@@ -85,8 +85,31 @@ const profile = {
   telegram: 'https://t.me/Drakon_v2',
   whatsapp: 'https://wa.me/48576468614',
   summary:
-    'Junior .NET developer focused on ASP.NET Core, EF Core, and WPF. Shipped a booking API, WPF weather dashboard, and PatchGuard diagnostics desktop tool. INF.03 / INF.04 — 100% practice. Open to remote work or hybrid in Silesia.',
+    'Backend APIs with EF Core and JWT, WPF desktop tools, and one full-stack booking app. Traced production bugs from API down to SQL at Techcom. Building FlowBoard — a Clean Architecture multi-tenant backend.',
 }
+
+const heroKpis = [
+  { value: '104', label: 'xUnit tests in FlowBoard' },
+  { value: '1 yr', label: 'C# & SQL in industry (Techcom)' },
+  { value: '3', label: 'shipped surfaces — API · WPF · full-stack' },
+]
+
+const currentlyBuilding = {
+  title: 'FlowBoard',
+  link: 'https://github.com/Drakonchik1/FlowBoard',
+  lines: [
+    'Clean Architecture SaaS backend — workspaces, invites, RBAC',
+    'JWT + refresh-token rotation, MediatR CQRS, FluentValidation',
+    'Docker Compose + SQL Server locally; CI on GitHub Actions',
+  ],
+}
+
+const lookingFor = [
+  'Junior .NET backend (ASP.NET Core)',
+  'Full-stack with a thin web UI',
+  'WPF / desktop tooling',
+  'Remote in Poland or hybrid — Silesia',
+]
 
 const techStack = [
   'C#',
@@ -295,14 +318,6 @@ const approachPillars = [
     title: 'Team habits',
     body: 'Git in short iterations, trace bugs from UI down to SQL, clarify API contracts with frontend — same rhythm as Techcom.',
   },
-]
-
-const technicalFocus = [
-  'JWT + refresh-token rotation and auth rate limiting (FlowBoard)',
-  'Booking overlap detection and status workflows',
-  'Dual weather APIs in one WPF dashboard',
-  'CQRS with MediatR + FluentValidation pipelines',
-  'Lists with filters, sorting, and pagination on APIs',
 ]
 
 // ─── Koch fractal snowflake generator ────────────────────────────────────────
@@ -1005,18 +1020,12 @@ function App() {
         <aside className="hero-side">
           <p className="eyebrow">At a glance</p>
           <div className="stats-grid">
-            <article>
-              <p className="kpi-value">5</p>
-              <p className="kpi-label">.NET projects (matches CV)</p>
-            </article>
-            <article>
-              <p className="kpi-value">100%</p>
-              <p className="kpi-label">INF.03 &amp; INF.04 practice</p>
-            </article>
-            <article>
-              <p className="kpi-value">C1</p>
-              <p className="kpi-label">English &amp; Polish</p>
-            </article>
+            {heroKpis.map((kpi) => (
+              <article key={kpi.label}>
+                <p className="kpi-value">{kpi.value}</p>
+                <p className="kpi-label">{kpi.label}</p>
+              </article>
+            ))}
           </div>
           <p className="availability">
             Open to remote work or hybrid in Silesia (Katowice area). Based in Tychy.
@@ -1044,22 +1053,6 @@ function App() {
                   <li key={line}>{line}</li>
                 ))}
               </ul>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="card approach section-with-rotors" id="approach">
-        <span className="card-rotor card-rotor--tr" aria-hidden="true" />
-        <h2>What I actually care about</h2>
-        <p className="approach-lead">
-          Not a manifesto — just habits that show up in the projects underneath.
-        </p>
-        <div className="approach-grid">
-          {approachPillars.map((item) => (
-            <article key={item.title} className="approach-item">
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
             </article>
           ))}
         </div>
@@ -1114,25 +1107,18 @@ function App() {
             </div>
           </section>
 
-          <section className="card">
-            <h2>Education</h2>
-            <p className="education-school">{education.school}</p>
-            <p className="education-meta">{education.program}</p>
-            <p className="education-meta">{education.period}</p>
-            <ul className="education-certs">
-              {education.certificates.map((cert) => (
-                <li key={cert}>{cert}</li>
+          <section className="card building-card">
+            <h2>Building now</h2>
+            <p className="building-title">
+              <a href={currentlyBuilding.link} target="_blank" rel="noreferrer">
+                {currentlyBuilding.title}
+              </a>
+            </p>
+            <ul className="building-list">
+              {currentlyBuilding.lines.map((line) => (
+                <li key={line}>{line}</li>
               ))}
             </ul>
-          </section>
-
-          <section className="card">
-            <h2>Stuff I’ve dug into</h2>
-            <ol className="popular-list">
-              {technicalFocus.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ol>
           </section>
 
           <section className="card section-with-rotors">
@@ -1146,6 +1132,27 @@ function App() {
           </section>
 
           <section className="card">
+            <h2>Open to</h2>
+            <ul className="looking-list">
+              {lookingFor.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="card">
+            <h2>Education</h2>
+            <p className="education-school">{education.school}</p>
+            <p className="education-meta">{education.program}</p>
+            <p className="education-meta">{education.period}</p>
+            <ul className="education-certs">
+              {education.certificates.map((cert) => (
+                <li key={cert}>{cert}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="card">
             <h2>Languages</h2>
             <ul className="language-list">
               {languages.map((lang) => (
@@ -1154,6 +1161,22 @@ function App() {
             </ul>
           </section>
         </aside>
+      </section>
+
+      <section className="card approach section-with-rotors" id="approach">
+        <span className="card-rotor card-rotor--tr" aria-hidden="true" />
+        <h2>How I work</h2>
+        <p className="approach-lead">
+          Habits from Techcom and personal projects — not repeated elsewhere on this page.
+        </p>
+        <div className="approach-grid">
+          {approachPillars.map((item) => (
+            <article key={item.title} className="approach-item">
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="card cta" id="contact">
