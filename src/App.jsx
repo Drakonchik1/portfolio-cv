@@ -21,69 +21,6 @@ function cancelParticleRaf() {
   __particleRafId = 0
 }
 
-/** Track element size — fires on window resize AND browser zoom (innerWidth/innerHeight change). */
-function useElementSize(ref) {
-  const [size, setSize] = useState({ width: 0, height: 0 })
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    const measure = () => {
-      const rect = el.getBoundingClientRect()
-      setSize((prev) => {
-        const w = Math.round(rect.width)
-        const h = Math.round(rect.height)
-        if (Math.abs(prev.width - w) < 1 && Math.abs(prev.height - h) < 1) return prev
-        return { width: w, height: h }
-      })
-    }
-
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    window.addEventListener('resize', measure, { passive: true })
-    const onWheel = (e) => {
-      if (e.ctrlKey) requestAnimationFrame(measure)
-    }
-    window.addEventListener('wheel', onWheel, { passive: true })
-
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', measure)
-      window.removeEventListener('wheel', onWheel)
-    }
-  }, [ref])
-
-  return size
-}
-
-function MountainBand({ variant, season }) {
-  const [c0, c1, c2, c3] = SEASON_CONFIG[season].mtnColors
-  const isTop = variant === 'top'
-  return (
-    <div className={`mtn-band mtn-band-${variant}`}>
-      <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        {isTop ? (
-          <>
-            <path d="M0 92  Q350 8   720 98  Q1050 8   1440 85  L1440 380 L0 380 Z" fill={c0} />
-            <path d="M0 148 Q450 62  720 155 Q1100 62  1440 140 L1440 380 L0 380 Z" fill={c1} />
-            <path d="M0 202 Q300 118 640 208 Q980  118 1440 195 L1440 380 L0 380 Z" fill={c2} />
-            <path d="M0 258 Q480 175 720 262 Q1050 178 1440 248 L1440 380 L0 380 Z" fill={c3} />
-          </>
-        ) : (
-          <>
-            <path d="M0 305 Q350 362 720 298 Q1050 360 1440 312 L1440 0 L0 0 Z" fill={c0} />
-            <path d="M0 250 Q450 300 720 244 Q1100 298 1440 255 L1440 0 L0 0 Z" fill={c1} />
-            <path d="M0 196 Q300 242 640 190 Q980  240 1440 200 L1440 0 L0 0 Z" fill={c2} />
-            <path d="M0 145 Q480 188 720 148 Q1050 185 1440 152 L1440 0 L0 0 Z" fill={c3} />
-          </>
-        )}
-      </svg>
-    </div>
-  )
-}
-
 // ─── Season System ────────────────────────────────────────────────────────────
 const SEASON_CONFIG = {
   winter: {
@@ -610,28 +547,19 @@ function ParticleField({ season }) {
     }
 
     const wrap = canvas.closest('.particle-season-wrap')
-    if (!wrap) return
-    wrap.querySelectorAll('canvas.snow-field').forEach((c) => {
+    wrap?.querySelectorAll('canvas.snow-field').forEach((c) => {
       if (c !== canvas) c.remove()
     })
-
+    const w0 = window.innerWidth
+    const h0 = window.innerHeight
+    // Reset bitmap so no previous season pixels linger on the same element
+    canvas.width = w0
+    canvas.height = h0
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.globalAlpha = 1
     ctx.globalCompositeOperation = 'source-over'
-
-    let cssW = 1
-    let cssH = 1
-    let lastCssW = 0
-    let lastCssH = 0
-
-    const readCssSize = () => {
-      const rect = wrap.getBoundingClientRect()
-      return {
-        w: Math.max(1, rect.width),
-        h: Math.max(1, rect.height),
-      }
-    }
 
     const particles = []
     // Autumn: many thin streaks; other seasons: fewer, larger motes
@@ -642,8 +570,8 @@ function ParticleField({ season }) {
 
     const seedParticles = () => {
       particles.length = 0
-      const w = cssW
-      const h = cssH
+      const w = canvas.width
+      const h = canvas.height
       if (w < 1 || h < 1) return
       for (let i = 0; i < COUNT; i++) {
         if (isAutumn) {
@@ -677,34 +605,23 @@ function ParticleField({ season }) {
       }
     }
 
-    const fitCanvas = (forceReseed = false) => {
-      if (session !== __particleCanvasSession) return false
-      const { w, h } = readCssSize()
-      const dpr = window.devicePixelRatio || 1
-      cssW = w
-      cssH = h
-      canvas.style.width = `${w}px`
-      canvas.style.height = `${h}px`
-      const bw = Math.max(1, Math.round(w * dpr))
-      const bh = Math.max(1, Math.round(h * dpr))
-      const dimsChanged = canvas.width !== bw || canvas.height !== bh
+    seedParticles()
+
+    const resize = () => {
+      if (session !== __particleCanvasSession) return
+      const w = window.innerWidth
+      const h = window.innerHeight
+      const dimsChanged = canvas.width !== w || canvas.height !== h
       if (dimsChanged) {
-        canvas.width = bw
-        canvas.height = bh
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+        canvas.width = w
+        canvas.height = h
       }
-      if (dimsChanged || forceReseed || particles.length === 0) {
+      if (dimsChanged || particles.length === 0) {
         seedParticles()
       }
-      return dimsChanged
     }
 
-    fitCanvas(true)
-
-    const resizeObserver = new ResizeObserver(() => fitCanvas(true))
-    resizeObserver.observe(wrap)
-    const stage = wrap.closest('.scenery-stage')
-    if (stage) resizeObserver.observe(stage)
+    window.addEventListener('resize', resize, { passive: true })
 
     // Pick once per season — avoids branching inside the hot loop (hundreds of particles × 60fps)
     const drawParticle =
@@ -795,19 +712,13 @@ function ParticleField({ season }) {
         cancelParticleRaf()
         return
       }
-
-      const { w, h } = readCssSize()
-      if (Math.abs(w - lastCssW) > 0.5 || Math.abs(h - lastCssH) > 0.5) {
-        lastCssW = w
-        lastCssH = h
-        fitCanvas(true)
-      }
-
-      ctx.clearRect(0, 0, cssW, cssH)
-      if (cssW >= 1 && cssH >= 1) {
+      const cw = canvas.width
+      const ch = canvas.height
+      ctx.clearRect(0, 0, cw, ch)
+      if (cw >= 1 && ch >= 1) {
         for (let i = 0, n = particles.length; i < n; i++) {
           const p = particles[i]
-          updateParticle(p, t, cssW, cssH)
+          updateParticle(p, t, cw, ch)
           drawParticle(p, t)
         }
       }
@@ -831,7 +742,7 @@ function ParticleField({ season }) {
       alive = false
       document.removeEventListener('visibilitychange', onVisibility)
       cancelParticleRaf()
-      resizeObserver.disconnect()
+      window.removeEventListener('resize', resize)
       try {
         if (canvas.width > 0 && canvas.height > 0) {
           ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -845,7 +756,7 @@ function ParticleField({ season }) {
   return <canvas ref={canvasRef} className="snow-field" aria-hidden="true" />
 }
 
-function SideDecorations({ size, season, containerRef }) {
+function SideDecorations({ viewport, season }) {
   const [mouse, setMouse] = useState({ x: 0, y: 0 })
   const glow = SEASON_CONFIG[season].sideGlow
 
@@ -857,12 +768,7 @@ function SideDecorations({ size, season, containerRef }) {
       setMouse({ x: latest.x, y: latest.y })
     }
     const onMove = (e) => {
-      const el = containerRef.current
-      const rect = el?.getBoundingClientRect()
-      latest = {
-        x: rect ? e.clientX - rect.left : e.clientX,
-        y: rect ? e.clientY - rect.top : e.clientY,
-      }
+      latest = { x: e.clientX, y: e.clientY }
       if (!raf) raf = requestAnimationFrame(flush)
     }
     window.addEventListener('pointermove', onMove, { passive: true })
@@ -870,13 +776,12 @@ function SideDecorations({ size, season, containerRef }) {
       window.removeEventListener('pointermove', onMove)
       cancelAnimationFrame(raf)
     }
-  }, [containerRef])
+  }, [])
 
   // Rejection-sampling packer: place each decoration randomly, retry if it
   // overlaps anything already placed (using actual pixel distances).
   const flakes = useMemo(() => {
-    const W = size.width
-    const H = size.height
+    const { width: W, height: H } = viewport
     if (!W || !H) return []
 
     const cfg   = SEASON_PLACEMENT[season]
@@ -917,7 +822,7 @@ function SideDecorations({ size, season, containerRef }) {
       // If 60 attempts all collided, that decoration is simply skipped
     }
     return out
-  }, [season, size.width, size.height])
+  }, [season, viewport.width, viewport.height])
 
   return (
     <div className="side-snowflakes season-deco-enter" aria-hidden="true">
@@ -967,18 +872,15 @@ function SideDecorations({ size, season, containerRef }) {
  * Fixed layer between mountain art (z-0) and .page (z-3). No createPortal — avoids mount races.
  * ParticleField stays mounted; decor remounts per season.
  */
-function SeasonVisualLayer({ season }) {
-  const rootRef = useRef(null)
-  const size = useElementSize(rootRef)
-
+function SeasonVisualLayer({ season, viewport }) {
   return (
-    <div ref={rootRef} className="season-visual-root" data-season={season}>
+    <div className="season-visual-root" data-season={season}>
       <div className="particle-season-wrap">
         <ParticleField season={season} />
       </div>
       <div key={season} className="season-decor-layer">
         <AmbientRotors season={season} />
-        <SideDecorations size={size} season={season} containerRef={rootRef} />
+        <SideDecorations viewport={viewport} season={season} />
       </div>
     </div>
   )
@@ -987,6 +889,7 @@ function SeasonVisualLayer({ season }) {
 function App() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [activeDemo, setActiveDemo] = useState(null)
+  const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight })
   const [season, setSeason] = useState(autoSeason)
   // true = user manually chose a season (overrides auto-sync)
   const [userPicked, setUserPicked] = useState(false)
@@ -1020,6 +923,22 @@ function App() {
     root.style.setProperty('--season-glow-outer', cfg.glowOuter)
   }, [season])
 
+  useEffect(() => {
+    let debounceId = 0
+    const onResize = () => {
+      window.clearTimeout(debounceId)
+      debounceId = window.setTimeout(() => {
+        setViewport({ width: window.innerWidth, height: window.innerHeight })
+      }, 120)
+    }
+
+    window.addEventListener('resize', onResize, { passive: true })
+    return () => {
+      window.clearTimeout(debounceId)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [])
+
   const filteredPosts = useMemo(() => {
     if (activeCategory === 'All') {
       return projectPosts
@@ -1029,15 +948,22 @@ function App() {
 
   return (
     <>
-      {/* Fixed scenery: mountains + particles share one viewport — scales together on zoom */}
-      <div id="scenery-stage" className="scenery-stage" aria-hidden="true">
-        <div className="scenery-peaks scenery-peaks--top">
-          <MountainBand variant="top" season={season} />
+      {/* Peaks = back-most art; particles portal mounts above this, .page above both */}
+      <div className="peaks-layer peaks-layer--top" aria-hidden="true">
+        <div className="mtn-band mtn-band-top">
+          {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
+            <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 92  Q350 8   720 98  Q1050 8   1440 85  L1440 380 L0 380 Z" fill={c0}/>
+              <path d="M0 148 Q450 62  720 155 Q1100 62  1440 140 L1440 380 L0 380 Z" fill={c1}/>
+              <path d="M0 202 Q300 118 640 208 Q980  118 1440 195 L1440 380 L0 380 Z" fill={c2}/>
+              <path d="M0 258 Q480 175 720 262 Q1050 178 1440 248 L1440 380 L0 380 Z" fill={c3}/>
+            </svg>
+          )})()}
         </div>
-        <div className="scenery-peaks scenery-peaks--bottom">
-          <MountainBand variant="bottom" season={season} />
-        </div>
-        <SeasonVisualLayer season={season} />
+      </div>
+
+      <div id="season-visual-portal" className="season-visual-mount">
+        <SeasonVisualLayer season={season} viewport={viewport} />
       </div>
 
       <a className="skip-link" href="#main-content">
@@ -1283,6 +1209,19 @@ function App() {
           </p>
         </footer>
       </main>
+
+      <div className="peaks-layer peaks-layer--bottom" aria-hidden="true">
+        <div className="mtn-band mtn-band-bottom">
+          {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
+            <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 305 Q350 362 720 298 Q1050 360 1440 312 L1440 0 L0 0 Z" fill={c0}/>
+              <path d="M0 250 Q450 300 720 244 Q1100 298 1440 255 L1440 0 L0 0 Z" fill={c1}/>
+              <path d="M0 196 Q300 242 640 190 Q980  240 1440 200 L1440 0 L0 0 Z" fill={c2}/>
+              <path d="M0 145 Q480 188 720 148 Q1050 185 1440 152 L1440 0 L0 0 Z" fill={c3}/>
+            </svg>
+          )})()}
+        </div>
+      </div>
 
       {activeDemo && (
         <Suspense fallback={null}>
