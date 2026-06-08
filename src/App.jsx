@@ -1020,23 +1020,6 @@ function App() {
           <div className="chips">
             <span>{profile.location}</span>
             <a href={`mailto:${profile.email}`}>{profile.email}</a>
-            <a href={profile.linkedin} target="_blank" rel="noreferrer">
-              LinkedIn
-            </a>
-            <a href={profile.github} target="_blank" rel="noreferrer">
-              GitHub
-            </a>
-            <a href={profile.telegram} target="_blank" rel="noreferrer">
-              Telegram
-            </a>
-          </div>
-          <div className="hero-cta">
-            <a className="hero-cta-primary" href="#projects">
-              View projects
-            </a>
-            <a className="hero-cta-secondary" href={profile.github} target="_blank" rel="noreferrer">
-              GitHub
-            </a>
           </div>
         </div>
         <aside className="hero-side">
@@ -1205,8 +1188,8 @@ function App() {
       <section className="card cta" id="contact">
         <h2>Contact</h2>
         <p className="summary">
-          Hiring for junior .NET backend, full-stack, or WPF desktop? Remote or Silesia hybrid works. Email,
-          LinkedIn, or Telegram — I’ll reply.
+          Junior .NET backend, full-stack, or WPF — remote or Silesia hybrid. Code is on GitHub under each
+          project; reach me here if you’re hiring.
         </p>
         <div className="chips">
           <a href={`mailto:${profile.email}`}>Email</a>
@@ -1214,27 +1197,10 @@ function App() {
           <a href={profile.linkedin} target="_blank" rel="noreferrer">
             LinkedIn
           </a>
-          <a href={profile.github} target="_blank" rel="noreferrer">
-            GitHub
-          </a>
-        </div>
-        <p className="contact-secondary">
           <a href={profile.telegram} target="_blank" rel="noreferrer">
             Telegram
           </a>
-          <span className="contact-dot" aria-hidden="true">
-            ·
-          </span>
-          <a href={profile.whatsapp} target="_blank" rel="noreferrer">
-            WhatsApp
-          </a>
-          <span className="contact-dot" aria-hidden="true">
-            ·
-          </span>
-          <a href={profile.portfolioRepo} target="_blank" rel="noreferrer">
-            Portfolio source
-          </a>
-        </p>
+        </div>
       </section>
 
         <footer className="footer">
