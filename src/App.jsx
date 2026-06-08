@@ -21,41 +21,72 @@ function cancelParticleRaf() {
   __particleRafId = 0
 }
 
-/** Layout + visual viewport — keeps fixed decor aligned when browser zoom changes. */
+let __layoutWidthBaseline = null
+
+/** Detect browser zoom even when ResizeObserver / visualViewport events are flaky (Windows Chrome). */
 function readDecorViewport() {
   const vv = window.visualViewport
-  if (!vv) {
-    return {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      scale: 1,
-      offsetLeft: 0,
-      offsetTop: 0,
-    }
+  const width = vv?.width ?? window.innerWidth
+  const height = vv?.height ?? window.innerHeight
+
+  if (__layoutWidthBaseline === null) {
+    __layoutWidthBaseline = width
+  } else if (vv?.scale === 1 && Math.abs(width - __layoutWidthBaseline) > 48) {
+    // Window was resized at 100% zoom — refresh baseline
+    __layoutWidthBaseline = width
   }
+
+  const zoomFromWidth =
+    __layoutWidthBaseline > 0 ? __layoutWidthBaseline / width : 1
+  const scale = Math.max(vv?.scale ?? 1, zoomFromWidth)
+
   return {
-    width: vv.width,
-    height: vv.height,
-    scale: vv.scale,
-    offsetLeft: vv.offsetLeft,
-    offsetTop: vv.offsetTop,
+    width,
+    height,
+    scale,
+    offsetLeft: vv?.offsetLeft ?? 0,
+    offsetTop: vv?.offsetTop ?? 0,
   }
+}
+
+function viewportChanged(a, b) {
+  return (
+    Math.abs(a.width - b.width) > 0.5 ||
+    Math.abs(a.height - b.height) > 0.5 ||
+    Math.abs(a.scale - b.scale) > 0.01 ||
+    Math.abs(a.offsetLeft - b.offsetLeft) > 0.5 ||
+    Math.abs(a.offsetTop - b.offsetTop) > 0.5
+  )
 }
 
 function useDecorViewport() {
   const [viewport, setViewport] = useState(readDecorViewport)
 
   useEffect(() => {
-    const sync = () => setViewport(readDecorViewport())
+    const sync = () => {
+      const next = readDecorViewport()
+      setViewport((prev) => (viewportChanged(prev, next) ? next : prev))
+    }
     sync()
+
     window.addEventListener('resize', sync, { passive: true })
+    const onWheel = (e) => {
+      if (e.ctrlKey) sync()
+    }
+    window.addEventListener('wheel', onWheel, { passive: true })
+
     const vv = window.visualViewport
     vv?.addEventListener('resize', sync)
     vv?.addEventListener('scroll', sync)
+
+    const poll = window.setInterval(sync, 120)
+
     return () => {
       window.removeEventListener('resize', sync)
+      window.removeEventListener('wheel', onWheel)
       vv?.removeEventListener('resize', sync)
       vv?.removeEventListener('scroll', sync)
+      window.clearInterval(poll)
     }
   }, [])
 
@@ -69,6 +100,32 @@ function useDecorViewport() {
   }, [viewport])
 
   return viewport
+}
+
+function MountainBand({ variant, season }) {
+  const [c0, c1, c2, c3] = SEASON_CONFIG[season].mtnColors
+  const isTop = variant === 'top'
+  return (
+    <div className={`mtn-band mtn-band-${variant}`}>
+      <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        {isTop ? (
+          <>
+            <path d="M0 92  Q350 8   720 98  Q1050 8   1440 85  L1440 380 L0 380 Z" fill={c0} />
+            <path d="M0 148 Q450 62  720 155 Q1100 62  1440 140 L1440 380 L0 380 Z" fill={c1} />
+            <path d="M0 202 Q300 118 640 208 Q980  118 1440 195 L1440 380 L0 380 Z" fill={c2} />
+            <path d="M0 258 Q480 175 720 262 Q1050 178 1440 248 L1440 380 L0 380 Z" fill={c3} />
+          </>
+        ) : (
+          <>
+            <path d="M0 305 Q350 362 720 298 Q1050 360 1440 312 L1440 0 L0 0 Z" fill={c0} />
+            <path d="M0 250 Q450 300 720 244 Q1100 298 1440 255 L1440 0 L0 0 Z" fill={c1} />
+            <path d="M0 196 Q300 242 640 190 Q980  240 1440 200 L1440 0 L0 0 Z" fill={c2} />
+            <path d="M0 145 Q480 188 720 148 Q1050 185 1440 152 L1440 0 L0 0 Z" fill={c3} />
+          </>
+        )}
+      </svg>
+    </div>
+  )
 }
 
 // ─── Season System ────────────────────────────────────────────────────────────
@@ -603,19 +660,23 @@ function ParticleField({ season }) {
       if (c !== canvas) c.remove()
     })
 
-    const readCanvasSize = () => ({
-      w: Math.max(1, Math.round(wrap.clientWidth)),
-      h: Math.max(1, Math.round(wrap.clientHeight)),
-    })
-
-    const { w: w0, h: h0 } = readCanvasSize()
-    canvas.width = w0
-    canvas.height = h0
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
-    ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.globalAlpha = 1
     ctx.globalCompositeOperation = 'source-over'
+
+    let cssW = 1
+    let cssH = 1
+    let lastCssW = 0
+    let lastCssH = 0
+
+    const readCssSize = () => {
+      const rect = wrap.getBoundingClientRect()
+      return {
+        w: Math.max(1, rect.width),
+        h: Math.max(1, rect.height),
+      }
+    }
 
     const particles = []
     // Autumn: many thin streaks; other seasons: fewer, larger motes
@@ -626,8 +687,8 @@ function ParticleField({ season }) {
 
     const seedParticles = () => {
       particles.length = 0
-      const w = canvas.width
-      const h = canvas.height
+      const w = cssW
+      const h = cssH
       if (w < 1 || h < 1) return
       for (let i = 0; i < COUNT; i++) {
         if (isAutumn) {
@@ -661,23 +722,34 @@ function ParticleField({ season }) {
       }
     }
 
-    const applyCanvasSize = () => {
-      if (session !== __particleCanvasSession) return
-      const { w, h } = readCanvasSize()
-      const dimsChanged = canvas.width !== w || canvas.height !== h
+    const fitCanvas = (forceReseed = false) => {
+      if (session !== __particleCanvasSession) return false
+      const { w, h } = readCssSize()
+      const dpr = window.devicePixelRatio || 1
+      cssW = w
+      cssH = h
+      canvas.style.width = `${w}px`
+      canvas.style.height = `${h}px`
+      const bw = Math.max(1, Math.round(w * dpr))
+      const bh = Math.max(1, Math.round(h * dpr))
+      const dimsChanged = canvas.width !== bw || canvas.height !== bh
       if (dimsChanged) {
-        canvas.width = w
-        canvas.height = h
+        canvas.width = bw
+        canvas.height = bh
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       }
-      if (dimsChanged || particles.length === 0) {
+      if (dimsChanged || forceReseed || particles.length === 0) {
         seedParticles()
       }
+      return dimsChanged
     }
 
-    seedParticles()
+    fitCanvas(true)
 
-    const resizeObserver = new ResizeObserver(() => applyCanvasSize())
+    const resizeObserver = new ResizeObserver(() => fitCanvas(true))
     resizeObserver.observe(wrap)
+    const stage = wrap.closest('.scenery-stage')
+    if (stage) resizeObserver.observe(stage)
 
     // Pick once per season — avoids branching inside the hot loop (hundreds of particles × 60fps)
     const drawParticle =
@@ -768,13 +840,19 @@ function ParticleField({ season }) {
         cancelParticleRaf()
         return
       }
-      const cw = canvas.width
-      const ch = canvas.height
-      ctx.clearRect(0, 0, cw, ch)
-      if (cw >= 1 && ch >= 1) {
+
+      const { w, h } = readCssSize()
+      if (Math.abs(w - lastCssW) > 0.5 || Math.abs(h - lastCssH) > 0.5) {
+        lastCssW = w
+        lastCssH = h
+        fitCanvas(true)
+      }
+
+      ctx.clearRect(0, 0, cssW, cssH)
+      if (cssW >= 1 && cssH >= 1) {
         for (let i = 0, n = particles.length; i < n; i++) {
           const p = particles[i]
-          updateParticle(p, t, cw, ch)
+          updateParticle(p, t, cssW, cssH)
           drawParticle(p, t)
         }
       }
@@ -992,21 +1070,14 @@ function App() {
 
   return (
     <>
-      {/* Peaks = back-most art; particles portal mounts above this, .page above both */}
-      <div className="peaks-layer peaks-layer--top" aria-hidden="true">
-        <div className="mtn-band mtn-band-top">
-          {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
-            <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 92  Q350 8   720 98  Q1050 8   1440 85  L1440 380 L0 380 Z" fill={c0}/>
-              <path d="M0 148 Q450 62  720 155 Q1100 62  1440 140 L1440 380 L0 380 Z" fill={c1}/>
-              <path d="M0 202 Q300 118 640 208 Q980  118 1440 195 L1440 380 L0 380 Z" fill={c2}/>
-              <path d="M0 258 Q480 175 720 262 Q1050 178 1440 248 L1440 380 L0 380 Z" fill={c3}/>
-            </svg>
-          )})()}
+      {/* Fixed scenery: mountains + particles share one viewport — scales together on zoom */}
+      <div id="scenery-stage" className="scenery-stage" aria-hidden="true">
+        <div className="scenery-peaks scenery-peaks--top">
+          <MountainBand variant="top" season={season} />
         </div>
-      </div>
-
-      <div id="season-visual-portal" className="season-visual-mount">
+        <div className="scenery-peaks scenery-peaks--bottom">
+          <MountainBand variant="bottom" season={season} />
+        </div>
         <SeasonVisualLayer season={season} viewport={viewport} />
       </div>
 
@@ -1253,19 +1324,6 @@ function App() {
           </p>
         </footer>
       </main>
-
-      <div className="peaks-layer peaks-layer--bottom" aria-hidden="true">
-        <div className="mtn-band mtn-band-bottom">
-          {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
-            <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 305 Q350 362 720 298 Q1050 360 1440 312 L1440 0 L0 0 Z" fill={c0}/>
-              <path d="M0 250 Q450 300 720 244 Q1100 298 1440 255 L1440 0 L0 0 Z" fill={c1}/>
-              <path d="M0 196 Q300 242 640 190 Q980  240 1440 200 L1440 0 L0 0 Z" fill={c2}/>
-              <path d="M0 145 Q480 188 720 148 Q1050 185 1440 152 L1440 0 L0 0 Z" fill={c3}/>
-            </svg>
-          )})()}
-        </div>
-      </div>
 
       {activeDemo && (
         <Suspense fallback={null}>

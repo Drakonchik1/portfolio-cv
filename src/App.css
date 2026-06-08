@@ -1,20 +1,30 @@
-/* Behind particles (z-0); .page sits above at z-3 */
-.peaks-layer {
-  position: relative;
-  z-index: 0;
-}
-
-/* Portal target: fixed overlay — tracks visualViewport when browser zoom changes */
-#season-visual-portal.season-visual-mount,
-.season-visual-mount {
+/* Fixed scenery stage: mountains + particles share one box (zoom/resize safe) */
+.scenery-stage {
   position: fixed;
   left: var(--decor-ox, 0);
   top: var(--decor-oy, 0);
   width: var(--decor-vw, 100vw);
   height: var(--decor-vh, 100vh);
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
   overflow: hidden;
+}
+
+.scenery-peaks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  pointer-events: none;
+  line-height: 0;
+}
+
+.scenery-peaks--top {
+  top: 0;
+}
+
+.scenery-peaks--bottom {
+  bottom: 0;
 }
 
 /* Full-width mountain bands that scroll with the page */
@@ -35,13 +45,11 @@
 }
 
 .mtn-band-top {
-  height: clamp(16rem, 24vw, 23.75rem);
-  margin-bottom: -1px;
+  height: clamp(12rem, 22vh, 23.75rem);
 }
 
 .mtn-band-bottom {
-  height: clamp(16rem, 24vw, 23.75rem);
-  margin-top: -1px;
+  height: clamp(12rem, 22vh, 23.75rem);
 }
 
 .skip-link {
@@ -124,14 +132,14 @@
 }
 
 
-/* Fills .season-visual-mount (fixed z-2 between peaks and .page) */
+/* Particles + seasonal decor — fills scenery stage above mountain art */
 .season-visual-root {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
   isolation: isolate;
 }
 
@@ -375,16 +383,16 @@
 .bg-glow {
   position: absolute;
   z-index: 0;
-  width: calc(26.25rem * var(--decor-scale, 1));
-  height: calc(26.25rem * var(--decor-scale, 1));
+  width: 26.25rem;
+  height: 26.25rem;
   border-radius: 50%;
-  filter: blur(calc(4.875rem * var(--decor-scale, 1)));
+  filter: blur(4.875rem);
   pointer-events: none;
 }
 
 .bg-glow-left {
-  left: calc(-9.375rem * var(--decor-scale, 1));
-  top: calc(-7.5rem * var(--decor-scale, 1));
+  left: -9.375rem;
+  top: -7.5rem;
   background: radial-gradient(
     circle,
     var(--season-glow-inner, rgba(122, 201, 255, 0.26)) 0%,
@@ -394,8 +402,8 @@
 }
 
 .bg-glow-right {
-  right: calc(-10.625rem * var(--decor-scale, 1));
-  top: calc(7.5rem * var(--decor-scale, 1));
+  right: -10.625rem;
+  top: 7.5rem;
   background: radial-gradient(
     circle,
     var(--season-glow-outer, rgba(180, 226, 255, 0.22)) 0%,
