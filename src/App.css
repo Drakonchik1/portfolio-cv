@@ -1,10 +1,9 @@
-/* Fixed scenery stage: mountains + particles share one box (zoom/resize safe) */
+/* Fixed full-viewport stage — let browser zoom scale CSS uniformly (no visualViewport px hacks) */
 .scenery-stage {
   position: fixed;
-  left: var(--decor-ox, 0);
-  top: var(--decor-oy, 0);
-  width: var(--decor-vw, 100vw);
-  height: var(--decor-vh, 100vh);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;

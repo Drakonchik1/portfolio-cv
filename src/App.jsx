@@ -21,85 +21,41 @@ function cancelParticleRaf() {
   __particleRafId = 0
 }
 
-let __layoutWidthBaseline = null
-
-/** Detect browser zoom even when ResizeObserver / visualViewport events are flaky (Windows Chrome). */
-function readDecorViewport() {
-  const vv = window.visualViewport
-  const width = vv?.width ?? window.innerWidth
-  const height = vv?.height ?? window.innerHeight
-
-  if (__layoutWidthBaseline === null) {
-    __layoutWidthBaseline = width
-  } else if (vv?.scale === 1 && Math.abs(width - __layoutWidthBaseline) > 48) {
-    // Window was resized at 100% zoom — refresh baseline
-    __layoutWidthBaseline = width
-  }
-
-  const zoomFromWidth =
-    __layoutWidthBaseline > 0 ? __layoutWidthBaseline / width : 1
-  const scale = Math.max(vv?.scale ?? 1, zoomFromWidth)
-
-  return {
-    width,
-    height,
-    scale,
-    offsetLeft: vv?.offsetLeft ?? 0,
-    offsetTop: vv?.offsetTop ?? 0,
-  }
-}
-
-function viewportChanged(a, b) {
-  return (
-    Math.abs(a.width - b.width) > 0.5 ||
-    Math.abs(a.height - b.height) > 0.5 ||
-    Math.abs(a.scale - b.scale) > 0.01 ||
-    Math.abs(a.offsetLeft - b.offsetLeft) > 0.5 ||
-    Math.abs(a.offsetTop - b.offsetTop) > 0.5
-  )
-}
-
-function useDecorViewport() {
-  const [viewport, setViewport] = useState(readDecorViewport)
+/** Track element size — fires on window resize AND browser zoom (innerWidth/innerHeight change). */
+function useElementSize(ref) {
+  const [size, setSize] = useState({ width: 0, height: 0 })
 
   useEffect(() => {
-    const sync = () => {
-      const next = readDecorViewport()
-      setViewport((prev) => (viewportChanged(prev, next) ? next : prev))
-    }
-    sync()
+    const el = ref.current
+    if (!el) return
 
-    window.addEventListener('resize', sync, { passive: true })
+    const measure = () => {
+      const rect = el.getBoundingClientRect()
+      setSize((prev) => {
+        const w = Math.round(rect.width)
+        const h = Math.round(rect.height)
+        if (Math.abs(prev.width - w) < 1 && Math.abs(prev.height - h) < 1) return prev
+        return { width: w, height: h }
+      })
+    }
+
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    window.addEventListener('resize', measure, { passive: true })
     const onWheel = (e) => {
-      if (e.ctrlKey) sync()
+      if (e.ctrlKey) requestAnimationFrame(measure)
     }
     window.addEventListener('wheel', onWheel, { passive: true })
 
-    const vv = window.visualViewport
-    vv?.addEventListener('resize', sync)
-    vv?.addEventListener('scroll', sync)
-
-    const poll = window.setInterval(sync, 120)
-
     return () => {
-      window.removeEventListener('resize', sync)
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
       window.removeEventListener('wheel', onWheel)
-      vv?.removeEventListener('resize', sync)
-      vv?.removeEventListener('scroll', sync)
-      window.clearInterval(poll)
     }
-  }, [])
+  }, [ref])
 
-  useEffect(() => {
-    const root = document.documentElement.style
-    root.setProperty('--decor-vw', `${viewport.width}px`)
-    root.setProperty('--decor-vh', `${viewport.height}px`)
-    root.setProperty('--decor-scale', String(viewport.scale))
-    root.setProperty('--decor-ox', `${viewport.offsetLeft}px`)
-    root.setProperty('--decor-oy', `${viewport.offsetTop}px`)
-  }, [viewport])
-
-  return viewport
+  return size
 }
 
 function MountainBand({ variant, season }) {
@@ -595,8 +551,7 @@ const SEASON_PLACEMENT = {
 
 const AMBIENT_ROT_SEED = { winter: 0xa11b001, spring: 0xa11b002, summer: 0xa11b003, autumn: 0xa11b004 }
 
-function AmbientRotors({ season, scale = 1 }) {
-  const sizeScale = Math.min(Math.max(scale, 0.75), 2)
+function AmbientRotors({ season }) {
   const items = useMemo(() => {
     const rng = lcg(AMBIENT_ROT_SEED[season])
     const n = 16
@@ -604,12 +559,12 @@ function AmbientRotors({ season, scale = 1 }) {
       id: `${season}-ar-${i}`,
       topPct: 4 + rng() * 90,
       leftPct: 2 + rng() * 96,
-      px: (20 + Math.floor(rng() * 58)) * sizeScale,
+      px: 20 + Math.floor(rng() * 58),
       sec: 18 + rng() * 36,
       rev: rng() > 0.47,
       dashed: rng() > 0.52,
     }))
-  }, [season, sizeScale])
+  }, [season])
 
   return (
     <div className="ambient-rotors" aria-hidden="true">
@@ -890,7 +845,7 @@ function ParticleField({ season }) {
   return <canvas ref={canvasRef} className="snow-field" aria-hidden="true" />
 }
 
-function SideDecorations({ viewport, season }) {
+function SideDecorations({ size, season, containerRef }) {
   const [mouse, setMouse] = useState({ x: 0, y: 0 })
   const glow = SEASON_CONFIG[season].sideGlow
 
@@ -902,9 +857,11 @@ function SideDecorations({ viewport, season }) {
       setMouse({ x: latest.x, y: latest.y })
     }
     const onMove = (e) => {
+      const el = containerRef.current
+      const rect = el?.getBoundingClientRect()
       latest = {
-        x: e.clientX - viewport.offsetLeft,
-        y: e.clientY - viewport.offsetTop,
+        x: rect ? e.clientX - rect.left : e.clientX,
+        y: rect ? e.clientY - rect.top : e.clientY,
       }
       if (!raf) raf = requestAnimationFrame(flush)
     }
@@ -913,15 +870,15 @@ function SideDecorations({ viewport, season }) {
       window.removeEventListener('pointermove', onMove)
       cancelAnimationFrame(raf)
     }
-  }, [viewport.offsetLeft, viewport.offsetTop])
+  }, [containerRef])
 
   // Rejection-sampling packer: place each decoration randomly, retry if it
   // overlaps anything already placed (using actual pixel distances).
   const flakes = useMemo(() => {
-    const { width: W, height: H, scale } = viewport
+    const W = size.width
+    const H = size.height
     if (!W || !H) return []
 
-    const sizeScale = Math.min(Math.max(scale, 0.75), 2)
     const cfg   = SEASON_PLACEMENT[season]
     const SEEDS = { winter: 0x5f3759, spring: 0x9a2b1c, summer: 0x4e7f3d, autumn: 0xb3c921 }
     const rng   = lcg(SEEDS[season])
@@ -931,7 +888,7 @@ function SideDecorations({ viewport, season }) {
     let id = 0
 
     for (let i = 0; i < cfg.count; i++) {
-      const size = (cfg.minSz + rng() * (cfg.maxSz - cfg.minSz)) * sizeScale
+      const size = cfg.minSz + rng() * (cfg.maxSz - cfg.minSz)
       const r    = size * 0.5 * cfg.gap   // collision radius (includes padding)
 
       let ok = false
@@ -960,7 +917,7 @@ function SideDecorations({ viewport, season }) {
       // If 60 attempts all collided, that decoration is simply skipped
     }
     return out
-  }, [season, viewport.width, viewport.height, viewport.scale])
+  }, [season, size.width, size.height])
 
   return (
     <div className="side-snowflakes season-deco-enter" aria-hidden="true">
@@ -1010,15 +967,18 @@ function SideDecorations({ viewport, season }) {
  * Fixed layer between mountain art (z-0) and .page (z-3). No createPortal — avoids mount races.
  * ParticleField stays mounted; decor remounts per season.
  */
-function SeasonVisualLayer({ season, viewport }) {
+function SeasonVisualLayer({ season }) {
+  const rootRef = useRef(null)
+  const size = useElementSize(rootRef)
+
   return (
-    <div className="season-visual-root" data-season={season}>
+    <div ref={rootRef} className="season-visual-root" data-season={season}>
       <div className="particle-season-wrap">
         <ParticleField season={season} />
       </div>
       <div key={season} className="season-decor-layer">
-        <AmbientRotors season={season} scale={viewport.scale} />
-        <SideDecorations viewport={viewport} season={season} />
+        <AmbientRotors season={season} />
+        <SideDecorations size={size} season={season} containerRef={rootRef} />
       </div>
     </div>
   )
@@ -1027,7 +987,6 @@ function SeasonVisualLayer({ season, viewport }) {
 function App() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [activeDemo, setActiveDemo] = useState(null)
-  const viewport = useDecorViewport()
   const [season, setSeason] = useState(autoSeason)
   // true = user manually chose a season (overrides auto-sync)
   const [userPicked, setUserPicked] = useState(false)
@@ -1078,7 +1037,7 @@ function App() {
         <div className="scenery-peaks scenery-peaks--bottom">
           <MountainBand variant="bottom" season={season} />
         </div>
-        <SeasonVisualLayer season={season} viewport={viewport} />
+        <SeasonVisualLayer season={season} />
       </div>
 
       <a className="skip-link" href="#main-content">
