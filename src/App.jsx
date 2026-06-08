@@ -179,25 +179,40 @@ const projectPosts = [
     link: 'https://github.com/Drakonchik1/FlowBoard',
     demo: {
       type: 'api',
-      endpoints: [
-        { method: 'POST', path: '/api/auth/register', desc: 'Register user — BCrypt hashing, rate limited' },
-        { method: 'POST', path: '/api/auth/login', desc: 'JWT access + refresh token (family-based rotation)' },
-        { method: 'POST', path: '/api/workspaces', desc: 'Create workspace — Owner role assigned' },
-        { method: 'POST', path: '/api/workspaces/{id}/invites', desc: 'Invite member — RBAC: Owner / Admin / Member' },
+      github: 'https://github.com/Drakonchik1/FlowBoard',
+      howItWorks: [
+        { step: 1, title: 'Register or log in', desc: 'POST /api/auth/register or /login → short-lived JWT access token + refresh token (BCrypt passwords, 5 req/min per IP).' },
+        { step: 2, title: 'Create a workspace', desc: 'Authenticated POST /api/workspaces — you become Owner. Each workspace is an isolated tenant for future boards.' },
+        { step: 3, title: 'Invite teammates', desc: 'POST /api/workspaces/{id}/members with userId + role (Admin/Member/Viewer). Non-members get 404 — no workspace ID leaks.' },
+        { step: 4, title: 'Refresh safely', desc: 'POST /api/auth/refresh rotates the refresh-token family; reused tokens revoke the whole chain (stolen-token protection).' },
       ],
-      sample: `// Clean Architecture layers
-Domain → Application (MediatR + FluentValidation)
-       → Infrastructure (EF Core, JWT, BCrypt)
-       → API (Scalar docs, health checks, rate limiting)
+      flow: 'Register → Login → Create workspace → Invite member → Refresh token rotation',
+      tryLocal: [
+        'docker compose up -d sqlserver',
+        'dotnet run --project src/FlowBoard.API',
+        '# Open http://localhost:5248/scalar/v1',
+        'dotnet test   # 104 unit tests',
+      ],
+      endpoints: [
+        { method: 'POST', path: '/api/auth/register', desc: 'Create account → JWT + refresh token' },
+        { method: 'POST', path: '/api/auth/refresh', desc: 'Rotate refresh token (family-based)' },
+        { method: 'POST', path: '/api/workspaces', desc: 'Create workspace (Bearer token)' },
+        { method: 'POST', path: '/api/workspaces/{id}/members', desc: 'Invite by userId + role' },
+      ],
+      sampleLabel: 'Request → layers (from README)',
+      sample: `HTTP POST /api/workspaces  (Authorization: Bearer …)
+  → API controller
+  → MediatR command handler
+  → FluentValidation pipeline
+  → EF Core → SQL Server
 
-// 104 xUnit tests — handlers + domain entities
-// Docker Compose for local SQL Server`,
+Response: workspace id + your role = Owner`,
       highlights: [
-        'Clean Architecture — Domain / Application / Infrastructure / API',
-        'JWT + family-based refresh-token rotation, BCrypt, auth rate limiting',
-        'Multi-tenant workspaces, invites, RBAC (Owner / Admin / Member)',
-        'CQRS with MediatR + FluentValidation; Scalar/OpenAPI docs',
-        '104 xUnit tests; Docker Compose for local SQL Server',
+        'Clean Architecture — zero-deps Domain layer',
+        'MediatR CQRS + FluentValidation behaviors',
+        'JWT 15 min + 7-day refresh with family rotation',
+        'RBAC: Owner > Admin > Member > Viewer',
+        'Scalar OpenAPI · health checks · GitHub Actions CI',
       ],
     },
   },
@@ -208,23 +223,43 @@ Domain → Application (MediatR + FluentValidation)
     stack: '.NET 10 · ASP.NET Core · EF Core · SQLite · Swagger',
     category: 'Backend',
     proof: 'Runnable · Swagger',
-    link: 'https://github.com/Drakonchik1',
+    link: 'https://github.com/Drakonchik1/TaskManagerAPI',
     demo: {
       type: 'api',
+      github: 'https://github.com/Drakonchik1/TaskManagerAPI',
+      howItWorks: [
+        { step: 1, title: 'Start the API', desc: 'dotnet run creates SQLite DB and seeds sample tasks automatically.' },
+        { step: 2, title: 'List with filters', desc: 'GET /api/tasks?priority=High&progress=InProgress&page=1&pageSize=10 — search text and due-date range supported.' },
+        { step: 3, title: 'Create or update', desc: 'POST validates title (required, max 160) and priority/progress enums; PUT updates fields and sets CompletedAtUtc when done.' },
+        { step: 4, title: 'Errors stay consistent', desc: 'Validation failures and exceptions pass through global middleware → same JSON error shape every time.' },
+      ],
+      flow: 'Client → Controller → Service → EF Core → SQLite',
+      tryLocal: [
+        'git clone https://github.com/Drakonchik1/TaskManagerAPI',
+        'dotnet run',
+        '# Swagger UI: http://localhost:5264/swagger',
+      ],
       endpoints: [
-        { method: 'GET', path: '/api/tasks', desc: 'List tasks — filter, sort, paginate' },
-        { method: 'POST', path: '/api/tasks', desc: 'Create task with validation' },
-        { method: 'PUT', path: '/api/tasks/{id}', desc: 'Update title, priority, progress' },
+        { method: 'GET', path: '/api/tasks', desc: 'Filter · sort · paginate task list' },
+        { method: 'GET', path: '/api/tasks/{id}', desc: 'Single task by id' },
+        { method: 'POST', path: '/api/tasks', desc: 'Create with validation' },
+        { method: 'PUT', path: '/api/tasks/{id}', desc: 'Update priority, progress, due date' },
         { method: 'DELETE', path: '/api/tasks/{id}', desc: 'Remove task' },
       ],
-      sample: `// Runnable via dotnet run — Swagger UI in README
-// Global exception middleware → consistent JSON errors
-// Enums serialized as strings (JsonStringEnumConverter)`,
+      sampleLabel: 'Create task (POST /api/tasks)',
+      sample: `{
+  "title": "Ship MVP",
+  "description": "Finalize API and update README.",
+  "priority": "High",
+  "dueDateUtc": "2026-03-29T10:00:00Z"
+}
+
+→ 201 Created with id, progress: "Todo", createdAtUtc`,
       highlights: [
-        'REST CRUD with filtering, sorting, and pagination',
-        'Input validation + global exception middleware',
-        'EF Core + SQLite with seed data',
-        'Swagger/OpenAPI for interactive testing',
+        'Controller → Service → Data layering',
+        'Query params: priority, progress, search, due range, sort, page',
+        'JsonStringEnumConverter — enums as readable strings in JSON',
+        'Rate limit 120 req/min per IP on API',
       ],
     },
   },
@@ -235,24 +270,42 @@ Domain → Application (MediatR + FluentValidation)
     stack: 'ASP.NET Core · EF Core · SQLite · JavaScript',
     category: 'Full-Stack',
     proof: 'Runnable · UI + API',
-    link: 'https://github.com/Drakonchik1',
+    link: 'https://github.com/Drakonchik1/BookingSystemAPI',
     demo: {
       type: 'api',
-      endpoints: [
-        { method: 'GET', path: '/api/catalog', desc: 'Browse providers and service types' },
-        { method: 'POST', path: '/api/bookings', desc: 'Create booking — conflict detection included' },
-        { method: 'PATCH', path: '/api/bookings/{id}/status', desc: 'Advance: Scheduled → Confirmed → Completed' },
-        { method: 'DELETE', path: '/api/bookings/{id}', desc: 'Cancel booking' },
+      github: 'https://github.com/Drakonchik1/BookingSystemAPI',
+      howItWorks: [
+        { step: 1, title: 'Load the catalog', desc: 'GET /api/catalog returns seeded service types (duration, price) and providers — the UI fills dropdowns from this.' },
+        { step: 2, title: 'Book a slot', desc: 'POST /api/bookings with provider, service, start time. Server calculates end time from service duration.' },
+        { step: 3, title: 'Conflict check', desc: 'Before save, service queries overlapping bookings for that provider. Overlap → 409 Conflict, nothing written.' },
+        { step: 4, title: 'Manage status', desc: 'PATCH /api/bookings/{id}/status moves Scheduled → Confirmed → Completed (or Cancelled). Same UI and Swagger can drive it.' },
       ],
-      sample: `// 409 Conflict if slot is already taken:
-{ "error": "Time slot is already booked for this provider." }
+      flow: 'Catalog → POST booking → overlap check → save OR 409 → PATCH status',
+      tryLocal: [
+        'git clone https://github.com/Drakonchik1/BookingSystemAPI',
+        'dotnet run',
+        '# App UI:  http://localhost:5283',
+        '# Swagger: http://localhost:5283/swagger',
+      ],
+      endpoints: [
+        { method: 'GET', path: '/api/catalog', desc: 'Services + providers for the form' },
+        { method: 'POST', path: '/api/bookings', desc: 'Create — auto end time + conflict check' },
+        { method: 'PATCH', path: '/api/bookings/{id}/status', desc: 'Scheduled → Confirmed → Completed' },
+        { method: 'GET', path: '/api/bookings', desc: 'Filter by day, provider, or status' },
+      ],
+      sampleLabel: 'Conflict response (409)',
+      sample: `POST /api/bookings  — provider already booked 10:00–11:00
 
-// UI + Swagger both run from one dotnet run`,
+{
+  "error": "Time slot is already booked for this provider."
+}
+
+No row inserted — rule enforced in BookingService, not only in UI.`,
       highlights: [
-        'Overlap detection — service-layer validation before save',
-        'Status workflow: Scheduled → Confirmed → Completed',
-        'Vanilla JS UI in wwwroot wired to the API',
-        'Seeded catalog on first run',
+        'wwwroot vanilla JS calls the same API as Swagger',
+        'Relational model: bookings ↔ service types ↔ providers',
+        'End time derived from service duration',
+        'Sample data seeded on first run for instant demo',
       ],
     },
   },
@@ -263,20 +316,41 @@ Domain → Application (MediatR + FluentValidation)
     stack: '.NET 8 · WPF · REST APIs',
     category: 'Desktop',
     proof: 'WPF · dual weather APIs',
-    link: 'https://github.com/Drakonchik1',
+    link: 'https://github.com/Drakonchik1/WeatherApp',
     demo: {
       type: 'app',
-      screens: [
-        { label: 'Dashboard', desc: 'Charts for temperature, humidity, pressure, rainfall' },
-        { label: 'Dual APIs', desc: 'OpenWeatherMap + IMGW (Polish public weather data)' },
-        { label: 'Date Filter', desc: 'Historical samples with async, cancellation-friendly loading' },
-        { label: 'CSV Export', desc: 'Export current dataset with source label per row' },
+      github: 'https://github.com/Drakonchik1/WeatherApp',
+      howItWorks: [
+        { step: 1, title: 'Pick a city', desc: 'Enter a location — app can query OpenWeatherMap (optional apikey.txt) and IMGW public data (no key needed for Poland).' },
+        { step: 2, title: 'Fetch in parallel', desc: 'Async HTTP calls with cancellation — UI stays responsive while both sources load.' },
+        { step: 3, title: 'Compare on dashboard', desc: 'Charts show temperature, humidity, pressure, rainfall. Each row is tagged with which API supplied it.' },
+        { step: 4, title: 'Filter & export', desc: 'Date filter loads historical OpenWeather samples; one click exports the current view to CSV.' },
       ],
+      tryLocal: [
+        'git clone https://github.com/Drakonchik1/WeatherApp',
+        'dotnet run --project WeatherApp/WeatherApp.csproj',
+        '# Optional: WeatherApp/apikey.txt for OpenWeatherMap',
+        '# Screenshots: docs/screenshots/ in repo',
+      ],
+      screens: [
+        { label: 'Main dashboard', desc: 'Live readings + charts — screenshot in repo README' },
+        { label: 'Source toggle', desc: 'Switch OpenWeatherMap vs IMGW or compare side by side' },
+        { label: 'Date filter', desc: 'Historical samples for a chosen day range' },
+        { label: 'CSV export', desc: 'Spreadsheet file with a column for data source' },
+      ],
+      sampleLabel: 'Data path',
+      sample: `City input
+  ├─ OpenWeatherMap REST (api key in apikey.txt)
+  └─ IMGW public API (Polish institute data)
+        ↓
+  View models → bound charts (MVVM)
+        ↓
+  Export → CSV with source label per row`,
       highlights: [
-        'Dual API integration — OpenWeatherMap + IMGW',
-        'Async HTTP with cancellation-friendly loading',
-        'Date filter for historical samples',
-        'CSV export with per-row API source label',
+        'Real dual-source integration — not mocked data',
+        'MVVM binding between services and charts',
+        'Cancellation-friendly async loads',
+        'README includes setup + screenshots',
       ],
     },
   },
@@ -287,20 +361,42 @@ Domain → Application (MediatR + FluentValidation)
     stack: '.NET 10 · WPF · MVVM · EF Core SQLite',
     category: 'Desktop',
     proof: 'Runnable · dotnet run',
-    link: 'https://github.com/Drakonchik1',
+    link: 'https://github.com/Drakonchik1/PatchGuard',
     demo: {
       type: 'app',
-      screens: [
-        { label: 'Scan', desc: 'Modular diagnostics — Event Log, updates, services, disk space' },
-        { label: 'History', desc: 'EF Core SQLite scan history with MVVM + DI' },
-        { label: 'AI Council', desc: 'Analyze → research → debate → chief verdict for manual repair steps' },
-        { label: 'Guides', desc: 'Structured repair guides — read-only, no admin elevation' },
+      github: 'https://github.com/Drakonchik1/PatchGuard',
+      howItWorks: [
+        { step: 1, title: 'Run a scan', desc: 'Pick a scenario — modular pipeline runs read-only checks (disk, Event Log 48h, Windows Update KBs, services).' },
+        { step: 2, title: 'Save results', desc: 'Findings stored in SQLite via EF Core — scan history you can revisit in the UI.' },
+        { step: 3, title: 'AI council (optional)', desc: 'Technician proposes fixes → Skeptic challenges → Researcher adds web context → Chief writes one manual guide. Works offline with local rules if no API key.' },
+        { step: 4, title: 'You apply fixes', desc: 'App never runs elevated commands — you follow the step-by-step guide yourself (safe by design).' },
       ],
+      flow: 'Scan modules → findings → SQLite history → council debate → manual repair guide',
+      tryLocal: [
+        'git clone https://github.com/Drakonchik1/PatchGuard',
+        'cd PatchGuard/PatchGuard',
+        'dotnet run',
+        '# Optional: appsettings.Development.json for OpenAI + Tavily',
+      ],
+      screens: [
+        { label: 'Home / Scan', desc: 'Choose diagnostic scenario and start pipeline' },
+        { label: 'Findings', desc: 'Severity-tagged issues from each module' },
+        { label: 'History', desc: 'Past scans from EF Core SQLite' },
+        { label: 'Council + Guide', desc: 'Multi-agent debate → unified manual steps' },
+      ],
+      sampleLabel: 'Diagnostic modules (from README)',
+      sample: `✓ OS build info
+✓ Disk space (C:)
+✓ Windows Update history (KB list)
+✓ Event Log — errors last 48h
+✓ Update services (read-only)
+
+No admin elevation — observation only.`,
       highlights: [
-        'Read-only Windows diagnostics (Event Log, updates, services, disk)',
-        'MVVM + DI + EF Core SQLite scan history',
-        'Modular diagnostic pipeline',
-        'Multi-agent AI council for manual repair guides — dotnet run from README',
+        'MVVM + DI — modular IDiagnosticModule plugins',
+        'WPF UI over .NET 10',
+        'Optional OpenAI + Tavily; local council fallback',
+        'EF Core SQLite for scan history',
       ],
     },
   },
@@ -1086,7 +1182,7 @@ function App() {
                   )}
                   {post.demo && (
                     <button className="read-more demo-btn" onClick={() => setActiveDemo(post)}>
-                      View demo
+                      How it works
                     </button>
                   )}
                 </div>

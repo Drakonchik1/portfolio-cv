@@ -13,6 +13,7 @@ export default function ProjectModal({ project, onClose }) {
 
   if (!project?.demo) return null
   const { demo } = project
+  const github = demo.github || project.link
 
   return (
     <div className="modal-overlay" onClick={onClose} aria-modal="true" role="dialog">
@@ -21,7 +22,7 @@ export default function ProjectModal({ project, onClose }) {
           ×
         </button>
 
-        <p className="eyebrow">{project.category} · Private Demo</p>
+        <p className="eyebrow">{project.category} · walkthrough</p>
         <h2 className="modal-title">{project.title.split(':')[0]}</h2>
         <p className="modal-sub">{project.excerpt}</p>
 
@@ -31,9 +32,40 @@ export default function ProjectModal({ project, onClose }) {
           ))}
         </div>
 
-        {demo.type === 'api' && (
+        {demo.howItWorks?.length > 0 && (
           <>
-            <h3 className="modal-section-head">Endpoints</h3>
+            <h3 className="modal-section-head">How it works</h3>
+            <ol className="how-steps">
+              {demo.howItWorks.map((step) => (
+                <li key={step.title} className="how-step">
+                  <p className="how-step-title">
+                    <span className="how-step-num">{step.step}</span>
+                    {step.title}
+                  </p>
+                  <p className="how-step-desc">{step.desc}</p>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+
+        {demo.flow && (
+          <p className="demo-flow">
+            <span className="demo-flow-label">Flow</span>
+            {demo.flow}
+          </p>
+        )}
+
+        {demo.tryLocal?.length > 0 && (
+          <>
+            <h3 className="modal-section-head">Try it locally (from README)</h3>
+            <pre className="demo-code demo-code--run">{demo.tryLocal.join('\n')}</pre>
+          </>
+        )}
+
+        {demo.type === 'api' && demo.endpoints?.length > 0 && (
+          <>
+            <h3 className="modal-section-head">Main API endpoints</h3>
             <div className="endpoint-list">
               {demo.endpoints.map((ep) => (
                 <div key={ep.path + ep.method} className="endpoint-row">
@@ -45,14 +77,12 @@ export default function ProjectModal({ project, onClose }) {
                 </div>
               ))}
             </div>
-            <h3 className="modal-section-head">Sample Response</h3>
-            <pre className="demo-code">{demo.sample}</pre>
           </>
         )}
 
-        {demo.type === 'app' && (
+        {demo.type === 'app' && demo.screens?.length > 0 && (
           <>
-            <h3 className="modal-section-head">App Screens</h3>
+            <h3 className="modal-section-head">What you see in the app</h3>
             <div className="screen-grid">
               {demo.screens.map((s) => (
                 <div key={s.label} className="screen-card">
@@ -64,12 +94,29 @@ export default function ProjectModal({ project, onClose }) {
           </>
         )}
 
-        <h3 className="modal-section-head">Key Technical Highlights</h3>
-        <ul className="highlight-list">
-          {demo.highlights.map((h) => (
-            <li key={h}>{h}</li>
-          ))}
-        </ul>
+        {demo.sample && (
+          <>
+            <h3 className="modal-section-head">{demo.sampleLabel || 'Example'}</h3>
+            <pre className="demo-code">{demo.sample}</pre>
+          </>
+        )}
+
+        {demo.highlights?.length > 0 && (
+          <>
+            <h3 className="modal-section-head">Under the hood</h3>
+            <ul className="highlight-list">
+              {demo.highlights.map((h) => (
+                <li key={h}>{h}</li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        {github && github !== '#' && (
+          <a className="modal-github" href={github} target="_blank" rel="noreferrer">
+            View source on GitHub →
+          </a>
+        )}
       </div>
     </div>
   )
