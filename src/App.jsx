@@ -74,56 +74,60 @@ function autoSeason() {
 
 const profile = {
   name: 'Pavlo Dorofieiev',
-  role: 'Junior .NET developer · ASP.NET Core, EF Core, WPF',
+  role: 'Junior .NET developer',
   location: 'Tychy, Poland',
   email: 'pavlo.dorofieiev@gmail.com',
   phone: '+48 576 468 614',
-  linkedin: 'https://www.linkedin.com/in/pavlo-dorofieiev-596b282b1/',
+  linkedin: 'https://linkedin.com/in/pavlo-dorofieiev-596b282b1/',
   github: 'https://github.com/Drakonchik1',
   portfolio: 'https://portfolio-cv-six-indol.vercel.app',
   portfolioRepo: 'https://github.com/Drakonchik1/portfolio-cv',
   telegram: 'https://t.me/Drakon_v2',
   whatsapp: 'https://wa.me/48576468614',
   summary:
-    'Backend APIs with EF Core and JWT, WPF desktop tools, and one full-stack booking app. Traced production bugs from API down to SQL at Techcom. Building FlowBoard — a Clean Architecture multi-tenant backend.',
+    'Junior .NET developer in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard: Clean Architecture, JWT, 143 unit tests. INF.03 / INF.04 passed. Available immediately — hybrid Katowice area or remote within Poland.',
 }
 
 const heroKpis = [
-  { value: '104', label: 'xUnit tests (FlowBoard)' },
-  { value: '1 yr', label: 'C# & SQL — Techcom' },
-  { value: '3×', label: 'API · WPF · full-stack' },
+  { value: '143', label: 'xUnit tests (FlowBoard)' },
+  { value: '100%', label: 'INF.03 & INF.04 practice' },
+  { value: 'Now', label: 'Available immediately' },
 ]
 
 const currentlyBuilding = {
   title: 'FlowBoard',
   link: 'https://github.com/Drakonchik1/FlowBoard',
   lines: [
-    'Clean Architecture SaaS backend — workspaces, invites, RBAC',
-    'JWT + refresh-token rotation, MediatR CQRS, FluentValidation',
-    'Docker Compose + SQL Server locally; CI on GitHub Actions',
+    'Clean Architecture — workspaces, invites, RBAC',
+    'JWT + refresh-token rotation, MediatR CQRS',
+    '143 unit tests · Docker Compose + SQL Server',
   ],
 }
 
 const lookingFor = [
+  'Available immediately',
   'Junior .NET backend (ASP.NET Core)',
-  'Full-stack with a thin web UI',
-  'WPF / desktop tooling',
-  'Remote in Poland or hybrid — Silesia',
+  'Hybrid — Katowice area',
+  'Remote within Poland',
 ]
 
-const techStack = [
-  'C#',
-  '.NET 8/10',
-  'ASP.NET Core',
-  'EF Core',
-  'SQL / SQLite',
-  'REST APIs',
-  'JWT',
-  'WPF / MVVM',
-  'Swagger / Scalar',
-  'Git',
-  'xUnit',
-  'Docker (basics)',
+const skillGroups = [
+  { label: 'Languages & runtime', items: ['C#', '.NET 8/10', 'SQL'] },
+  {
+    label: 'Backend',
+    items: ['ASP.NET Core', 'REST APIs', 'EF Core', 'SQLite', 'MS SQL', 'JWT', 'Swagger / Scalar', 'Azure'],
+  },
+  { label: 'Desktop & mobile', items: ['WPF', 'MVVM', '.NET MAUI'] },
+  { label: 'Frontend', items: ['HTML', 'CSS', 'JavaScript', 'React'] },
+  { label: 'Tools', items: ['Git', 'Visual Studio', 'VS Code', 'Docker', 'xUnit'] },
+  { label: 'Familiar', items: ['Angular', 'Vue.js', 'PHP', 'Microservices', 'Event-Driven Architecture'] },
+]
+
+const softSkills = [
+  'Team collaboration',
+  'Clear communication',
+  'Adaptability',
+  'Receptiveness to feedback',
 ]
 
 const categories = ['All', 'Backend', 'Full-Stack', 'Desktop']
@@ -132,12 +136,15 @@ const experiencePosts = [
   {
     company: 'Techcom',
     role: 'Programmer',
-    period: '02/2023 – 01/2024',
+    period: '02/2023 – 03/2023',
     location: 'Tychy, Poland',
     bullets: [
-      'Backend features in C# — API/data-layer changes, modules, and bug fixes',
-      'SQL (SELECT/INSERT/UPDATE) for reports, lists, and admin data operations',
-      'Git in short iterations; aligned with frontend on endpoints and error payloads',
+      'Developed and maintained backend features in C# — bug fixes, small modules, and API/data-layer changes',
+      'Wrote and updated SQL queries (SELECT/INSERT/UPDATE) for reports, lists, and admin-style data operations',
+      'Worked with relational databases — table design basics, joins, and keeping data consistent with app logic',
+      'Fixed backend defects from testing/production; traced issues from UI/API down to SQL when needed',
+      'Used Git for version control; deployed or tested changes with the team in short iterations',
+      'Collaborated with frontend on integration — clarified endpoints, payloads, and error cases',
     ],
   },
   {
@@ -146,23 +153,26 @@ const experiencePosts = [
     period: '03/2025 – 04/2025',
     location: 'Madrid, Spain',
     bullets: [
-      'Prepared and tested VR headsets before live educational sessions',
-      'Troubleshot issues with IT team during session delivery',
-      'VR hardware setup, calibration, and day-to-day operations',
+      'Supported live educational sessions using VR headsets in a professional IT environment',
+      'Prepared, configured, and tested VR equipment before each session to ensure stable, distraction-free delivery',
+      'Worked alongside an experienced IT support team — troubleshooting issues, assisting facilitators, and keeping sessions on schedule',
+      'Gained hands-on familiarity with VR hardware setup, calibration, and day-to-day operational workflows',
     ],
   },
 ]
 
 const education = {
   school: 'TEB Technikum Edukacja w Tychach',
-  program: 'Programmer — Information Technology',
+  program: 'Programmer',
   period: '2020 – 2026',
+  focus:
+    '2024–2026: INF.03/INF.04 exams and matura; portfolio backends (FlowBoard, PatchGuard) while preparing for junior .NET roles.',
   certificates: ['INF.03 — 100% practice', 'INF.04 — 100% practice'],
 }
 
 const languages = [
-  'Ukrainian — native',
-  'Russian — native',
+  'Russian — mother tongue',
+  'Ukrainian — mother tongue',
   'English — C1',
   'Polish — C1',
 ]
@@ -171,11 +181,11 @@ const projectPosts = [
   {
     title: 'FlowBoard: Flagship Backend (in progress)',
     excerpt:
-      'Multi-user project management API — Clean Architecture, JWT refresh-token rotation, workspaces with RBAC, CQRS with MediatR, 104 xUnit tests.',
+      'Multi-user project management API — Clean Architecture, JWT refresh-token rotation, workspaces with RBAC, CQRS with MediatR, 143 xUnit tests.',
     stack: '.NET 10 · ASP.NET Core · EF Core · SQL Server · Docker',
     category: 'Backend',
     status: 'In progress',
-    proof: 'GitHub · 104 tests · CI',
+    proof: 'GitHub · 143 tests · CI',
     link: 'https://github.com/Drakonchik1/FlowBoard',
     demo: {
       type: 'api',
@@ -191,7 +201,7 @@ const projectPosts = [
         'docker compose up -d sqlserver',
         'dotnet run --project src/FlowBoard.API',
         '# Open http://localhost:5248/scalar/v1',
-        'dotnet test   # 104 unit tests',
+        'dotnet test   # 143 unit tests',
       ],
       endpoints: [
         { method: 'POST', path: '/api/auth/register', desc: 'Create account → JWT + refresh token' },
@@ -1129,7 +1139,7 @@ function App() {
             ))}
           </div>
           <p className="availability">
-            Open to remote work or hybrid in Silesia (Katowice area). Based in Tychy.
+            Available immediately. Hybrid Katowice area or remote within Poland.
           </p>
         </aside>
       </section>
@@ -1225,12 +1235,26 @@ function App() {
 
           <section className="card section-with-rotors">
             <span className="card-rotor card-rotor--br-small" aria-hidden="true" />
-            <h2>Core stack</h2>
-            <div className="stack-cloud">
-              {techStack.map((item) => (
-                <span key={item}>{item}</span>
+            <h2>Skills</h2>
+            {skillGroups.map((group) => (
+              <div key={group.label} className="skill-group">
+                <p className="skill-group-label">{group.label}</p>
+                <div className="stack-cloud">
+                  {group.items.map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </section>
+
+          <section className="card">
+            <h2>Soft skills</h2>
+            <ul className="looking-list">
+              {softSkills.map((item) => (
+                <li key={item}>{item}</li>
               ))}
-            </div>
+            </ul>
           </section>
 
           <section className="card">
@@ -1246,7 +1270,8 @@ function App() {
             <h2>Education</h2>
             <p className="education-school">{education.school}</p>
             <p className="education-meta">{education.program}</p>
-            <p className="education-meta">{education.period}</p>
+            <p className="education-meta">{education.period} · Tychy, Poland</p>
+            <p className="education-focus">{education.focus}</p>
             <ul className="education-certs">
               {education.certificates.map((cert) => (
                 <li key={cert}>{cert}</li>
@@ -1284,8 +1309,8 @@ function App() {
       <section className="card cta" id="contact">
         <h2>Contact</h2>
         <p className="summary">
-          Junior .NET backend, full-stack, or WPF — remote or Silesia hybrid. Code is on GitHub under each
-          project; reach me here if you’re hiring.
+          Available immediately for junior .NET roles — hybrid Katowice area or remote within Poland.
+          Code on GitHub under each project.
         </p>
         <div className="chips">
           <a href={`mailto:${profile.email}`}>Email</a>
