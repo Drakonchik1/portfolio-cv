@@ -85,11 +85,11 @@ const profile = {
   telegram: 'https://t.me/Drakon_v2',
   whatsapp: 'https://wa.me/48576468614',
   summary:
-    'Junior .NET developer in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard: Clean Architecture, JWT, 143 unit tests. INF.03 / INF.04 passed. Available immediately — hybrid Katowice area or remote within Poland.',
+    'Junior .NET developer in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard: Clean Architecture, Kanban boards, SignalR, JWT, 241 unit tests. INF.03 / INF.04 passed. Available immediately — hybrid Katowice area or remote within Poland.',
 }
 
 const heroKpis = [
-  { value: '143', label: 'xUnit tests (FlowBoard)' },
+  { value: '241', label: 'xUnit tests (FlowBoard)' },
   { value: '100%', label: 'INF.03 & INF.04 practice' },
   { value: 'Now', label: 'Available immediately' },
 ]
@@ -98,9 +98,9 @@ const currentlyBuilding = {
   title: 'FlowBoard',
   link: 'https://github.com/Drakonchik1/FlowBoard',
   lines: [
-    'Clean Architecture — workspaces, invites, RBAC',
-    'JWT + refresh-token rotation, MediatR CQRS',
-    '143 unit tests · Docker Compose + SQL Server',
+    'Kanban boards + cards · SignalR real-time · optional Redis backplane',
+    'Comments, tags, queued email notifications (Sprint 6)',
+    '241 unit tests · Docker Compose + SQL Server',
   ],
 }
 
@@ -115,7 +115,7 @@ const skillGroups = [
   { label: 'Languages & runtime', items: ['C#', '.NET 8/10', 'SQL'] },
   {
     label: 'Backend',
-    items: ['ASP.NET Core', 'REST APIs', 'EF Core', 'SQLite', 'MS SQL', 'JWT', 'Swagger / Scalar', 'Azure'],
+    items: ['ASP.NET Core', 'REST APIs', 'EF Core', 'SQLite', 'MS SQL', 'JWT', 'Swagger / Scalar', 'SignalR'],
   },
   { label: 'Desktop & mobile', items: ['WPF', 'MVVM', '.NET MAUI'] },
   { label: 'Frontend', items: ['HTML', 'CSS', 'JavaScript', 'React'] },
@@ -150,7 +150,7 @@ const experiencePosts = [
   {
     company: 'IE University',
     role: 'VR/IT Support (Erasmus Internship)',
-    period: '03/2025 – 04/2025',
+    period: '17/03/2025 – 11/04/2025',
     location: 'Madrid, Spain',
     bullets: [
       'Supported live educational sessions using VR headsets in a professional IT environment',
@@ -181,11 +181,11 @@ const projectPosts = [
   {
     title: 'FlowBoard: Flagship Backend (in progress)',
     excerpt:
-      'Multi-user project management API — Clean Architecture, JWT refresh-token rotation, workspaces with RBAC, CQRS with MediatR, 143 xUnit tests.',
-    stack: '.NET 10 · ASP.NET Core · EF Core · SQL Server · Docker',
+      'Multi-user Kanban API — Clean Architecture, JWT refresh-token rotation, workspaces with RBAC, boards + cards, SignalR real-time, comments + tags + email, CQRS with MediatR, 241 xUnit tests.',
+    stack: '.NET 10 · ASP.NET Core · EF Core · SQL Server · SignalR · Redis · Docker',
     category: 'Backend',
     status: 'In progress',
-    proof: 'GitHub · 143 tests · CI',
+    proof: 'GitHub · 241 tests · CI',
     link: 'https://github.com/Drakonchik1/FlowBoard',
     demo: {
       type: 'api',
@@ -201,7 +201,7 @@ const projectPosts = [
         'docker compose up -d sqlserver',
         'dotnet run --project src/FlowBoard.API',
         '# Open http://localhost:5248/scalar/v1',
-        'dotnet test   # 143 unit tests',
+        'dotnet test   # 241 unit tests',
       ],
       endpoints: [
         { method: 'POST', path: '/api/auth/register', desc: 'Create account → JWT + refresh token' },
@@ -222,7 +222,9 @@ Response: workspace id + your role = Owner`,
         'MediatR CQRS + FluentValidation behaviors',
         'JWT 15 min + 7-day refresh with family rotation',
         'RBAC: Owner > Admin > Member > Viewer',
-        'Scalar OpenAPI · health checks · GitHub Actions CI',
+        'Kanban boards + cards · SignalR CardMoved / CommentAdded',
+        'Comments, tags, queued assignment emails (Sprint 6)',
+        'Optional Redis SignalR backplane · Scalar OpenAPI · CI',
       ],
     },
   },

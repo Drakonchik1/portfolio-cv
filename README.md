@@ -28,6 +28,12 @@ npm run build
 
 ## Recent updates (changelog)
 
+### 2026-07-03 — CV sync (site + markdown; PDF unchanged)
+- FlowBoard: **241** unit tests, Sprint 6 features (boards, SignalR, comments, tags, email)
+- Removed **Azure** from skills until deploy; added **SignalR**
+- IE University dates aligned with PDF: `17/03/2025 – 11/04/2025`
+- `CV_Pavlo_Dorofieiev_ENG.md` rewritten to match site
+
 ### Content & links
 - Profile links aligned with GitHub **Drakonchik1**, Vercel deployment, Telegram, WhatsApp.
 - Hero / contact copy tuned (professional tone, honest wording).
