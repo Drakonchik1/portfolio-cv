@@ -7,11 +7,11 @@ https://portfolio-cv-six-indol.vercel.app · https://linkedin.com/in/pavlo-dorof
 
 ## About myself
 
-Junior .NET developer in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard: Clean Architecture, Kanban boards, SignalR, JWT, 241 unit tests. INF.03/INF.04 passed. Available immediately. Hybrid Katowice area or remote within Poland.
+Junior .NET developer in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard MVP: Clean Architecture, Kanban, SignalR, Hangfire, JWT, 277 unit tests. PatchGuard: WPF diagnostics, ML anomaly detection, local RAG, multi-provider AI council, 336 tests. INF.03/INF.04 passed. Available immediately. Hybrid Katowice area or remote within Poland.
 
 ## Work experience
 
-### Programmer — Techcom · Tychy, Poland · 02/2023 – 03/2023
+### Programmer (Internship) — Techcom · Tychy, Poland · 02/2023 – 03/2023
 
 - Developed and maintained backend features in C# — bug fixes, small modules, and API/data-layer changes
 - Wrote and updated SQL queries (SELECT/INSERT/UPDATE) for reports, lists, and admin-style data operations
@@ -29,15 +29,20 @@ Junior .NET developer in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard: Clean 
 
 ## Education & training
 
+**Programmer (C#/.NET) — WSB Merito w Chorzowie · 2026 · Chorzów, Poland**
+
+- Admitted to 1st year of studies.
+
 **Programmer — TEB Technikum Edukacja w Tychach · 2020 – 2026 · Tychy, Poland**
 
-- 2024–2026: INF.03/INF.04 exams and matura; portfolio backends (FlowBoard, PatchGuard) while preparing for junior .NET roles
+- Obtained the professional title of Technik Programista.
+- INF.03/INF.04 exams and matura; portfolio backends (FlowBoard, PatchGuard) while preparing for junior .NET roles
 - Certificates: INF.03 — 100% practice · INF.04 — 100% practice
 
 ## Skills
 
 **Languages & runtime:** C#, .NET 8/10, SQL  
-**Backend:** ASP.NET Core, REST APIs, EF Core, SQLite, Swagger/Scalar, JWT, MS SQL, SignalR  
+**Backend:** ASP.NET Core, REST APIs, EF Core, Dapper, SQLite, MS SQL, Swagger/Scalar, JWT, SignalR, Hangfire, Redis, MediatR  
 **Desktop & mobile:** WPF, MVVM, .NET MAUI  
 **Frontend:** HTML, CSS, JavaScript, React  
 **Tools:** Git, Visual Studio, VS Code, Docker, xUnit  
@@ -50,15 +55,28 @@ Russian — mother tongue · Ukrainian — mother tongue · English — C1 · Po
 
 ## Projects
 
-### FlowBoard — .NET 10, ASP.NET Core, EF Core, SQL Server (in progress)
+### FlowBoard — .NET 10, ASP.NET Core, EF Core, SQL Server (MVP complete)
 
 - Flagship backend: Clean Architecture (Domain / Application / Infrastructure / API)
-- Auth: JWT + family-based refresh-token rotation, BCrypt, rate limiting on auth endpoints
+- Auth: JWT + family-based refresh-token rotation, BCrypt, rate limiting on auth and writes
 - Workspaces: multi-tenant workspaces, invites, RBAC (Owner / Admin / Member / Viewer)
-- Kanban boards + cards; SignalR real-time (`CardMoved`, `CommentAdded`); optional Redis backplane
-- Comments, tags, queued email notifications (Sprint 6)
-- CQRS with MediatR + FluentValidation pipeline; Scalar/OpenAPI docs
-- 241 xUnit tests (handlers + domain); 13 integration tests with Docker / TestContainers
+- Kanban boards + cards (Dapper reads, fractional-index ordering); SignalR real-time; optional Redis backplane
+- Comments, tags, assignment emails; Hangfire background jobs; card activity log
+- CQRS with MediatR + FluentValidation; Scalar/OpenAPI; Docker Compose (dev + prod); Railway / Azure deploy docs
+- 277 xUnit tests; 21 integration tests with Docker / TestContainers; CI
+
+### PatchGuard — .NET 10, WPF, MVVM, EF Core, Microsoft.ML, Ollama
+
+- Windows health & performance desktop: Dashboard, Diagnose, Live Monitor, Game FPS, Alerts, Optimize, Settings
+- Read-only diagnostics (OS, disk, memory, temps, CPU/GPU, Event Log, Windows Update); deterministic health score
+- Live hardware sensors (LibreHardwareMonitor) with 7-day sensor history (SQLite); game FPS via Intel PresentMon
+- ML anomaly detection: Z-score + Isolation Forest + Microsoft.ML RandomizedPCA (inference-only, bundled models)
+- Threshold alert engine (CPU/GPU temp + load) with guided-fix pipeline (preview → confirm → execute → verify)
+- Safe reversible optimizer (trim, temp, Recycle Bin, DNS) — no Windows settings changes
+- Multi-provider AI council: Azure OpenAI / OpenAI / Ollama (local) / Rules fallback; agentic graph with 4 agents
+- Local RAG: 16 playbooks with hybrid keyword+embedding retrieval; provenance labels in UI
+- DPAPI secret storage — API keys migrate from config to encrypted store; no plaintext in repo
+- EF Core SQLite scan history; 336 automated tests (navigation, scoring, ML, cloud boundaries, AI privacy, security)
 
 ### TaskManagerAPI — .NET 10, ASP.NET Core, EF Core
 
@@ -79,9 +97,3 @@ Russian — mother tongue · Ukrainian — mother tongue · English — C1 · Po
 - Dual API integration: OpenWeatherMap + IMGW (Polish public weather data)
 - Async HTTP calls with cancellation-friendly loading; date filter for historical samples
 - CSV export of the current dataset; source label per row (which API supplied data)
-
-### PatchGuard — .NET 10, WPF, MVVM, EF Core
-
-- WPF health checker: read-only Windows diagnostics (Event Log, updates, services, disk)
-- MVVM + DI + EF Core SQLite scan history; modular diagnostic pipeline
-- Multi-agent AI council (analyze → research → debate → chief verdict) for manual repair guides

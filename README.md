@@ -28,6 +28,14 @@ npm run build
 
 ## Recent updates (changelog)
 
+### 2026-07-16 — FlowBoard MVP + PatchGuard sync
+- FlowBoard: **277** unit tests, **21** integration tests; status **MVP complete** (Sprints 1–8)
+- FlowBoard bullets: Hangfire, activity log, Dapper reads, write rate limits, prod Docker / Railway / Azure **docs** (Azure still not claimed as hands-on deploy)
+- Skills: added Dapper, Hangfire, Redis, MediatR
+- PatchGuard: Live Monitor, Game FPS (PresentMon), safe Optimize, privacy-first AI council, **133** tests
+- Hero KPIs: 277 (FlowBoard) + 133 (PatchGuard); `CV_Pavlo_Dorofieiev_ENG.md` rewritten to match
+- PDF FlowCV still may lag — update separately (143 → 277 + PatchGuard section)
+
 ### 2026-07-03 — CV sync (site + markdown; PDF unchanged)
 - FlowBoard: **241** unit tests, Sprint 6 features (boards, SignalR, comments, tags, email)
 - Removed **Azure** from skills until deploy; added **SignalR**

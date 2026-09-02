@@ -85,12 +85,12 @@ const profile = {
   telegram: 'https://t.me/Drakon_v2',
   whatsapp: 'https://wa.me/48576468614',
   summary:
-    'Junior .NET developer in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard: Clean Architecture, Kanban boards, SignalR, JWT, 241 unit tests. INF.03 / INF.04 passed. Available immediately — hybrid Katowice area or remote within Poland.',
+    'Junior .NET developer in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard MVP: Clean Architecture, Kanban, SignalR, Hangfire, JWT, 277 unit tests. PatchGuard: WPF diagnostics, ML anomaly detection, local RAG, multi-provider AI council, 336 tests. INF.03 / INF.04 passed. Available immediately — hybrid Katowice area or remote within Poland.',
 }
 
 const heroKpis = [
-  { value: '241', label: 'xUnit tests (FlowBoard)' },
-  { value: '100%', label: 'INF.03 & INF.04 practice' },
+  { value: '277', label: 'xUnit tests (FlowBoard)' },
+  { value: '336', label: 'tests (PatchGuard)' },
   { value: 'Now', label: 'Available immediately' },
 ]
 
@@ -98,9 +98,9 @@ const currentlyBuilding = {
   title: 'FlowBoard',
   link: 'https://github.com/Drakonchik1/FlowBoard',
   lines: [
-    'Kanban boards + cards · SignalR real-time · optional Redis backplane',
-    'Comments, tags, queued email notifications (Sprint 6)',
-    '241 unit tests · Docker Compose + SQL Server',
+    'MVP complete (Sprints 1–8) · Hangfire jobs · card activity log',
+    'Kanban + SignalR · Redis backplane · prod Docker / Railway / Azure docs',
+    '277 unit tests · 21 integration tests (TestContainers)',
   ],
 }
 
@@ -115,7 +115,20 @@ const skillGroups = [
   { label: 'Languages & runtime', items: ['C#', '.NET 8/10', 'SQL'] },
   {
     label: 'Backend',
-    items: ['ASP.NET Core', 'REST APIs', 'EF Core', 'SQLite', 'MS SQL', 'JWT', 'Swagger / Scalar', 'SignalR'],
+    items: [
+      'ASP.NET Core',
+      'REST APIs',
+      'EF Core',
+      'Dapper',
+      'SQLite',
+      'MS SQL',
+      'JWT',
+      'Swagger / Scalar',
+      'SignalR',
+      'Hangfire',
+      'Redis',
+      'MediatR',
+    ],
   },
   { label: 'Desktop & mobile', items: ['WPF', 'MVVM', '.NET MAUI'] },
   { label: 'Frontend', items: ['HTML', 'CSS', 'JavaScript', 'React'] },
@@ -135,7 +148,7 @@ const categories = ['All', 'Backend', 'Full-Stack', 'Desktop']
 const experiencePosts = [
   {
     company: 'Techcom',
-    role: 'Programmer',
+    role: 'Programmer (Internship)',
     period: '02/2023 – 03/2023',
     location: 'Tychy, Poland',
     bullets: [
@@ -161,14 +174,25 @@ const experiencePosts = [
   },
 ]
 
-const education = {
-  school: 'TEB Technikum Edukacja w Tychach',
-  program: 'Programmer',
-  period: '2020 – 2026',
-  focus:
-    '2024–2026: INF.03/INF.04 exams and matura; portfolio backends (FlowBoard, PatchGuard) while preparing for junior .NET roles.',
-  certificates: ['INF.03 — 100% practice', 'INF.04 — 100% practice'],
-}
+const education = [
+  {
+    school: 'WSB Merito w Chorzowie',
+    program: 'Programmer (C#/.NET)',
+    period: '2026',
+    location: 'Chorzów, Poland',
+    focus: 'Admitted to 1st year of studies.',
+    certificates: [],
+  },
+  {
+    school: 'TEB Technikum Edukacja w Tychach',
+    program: 'Programmer',
+    period: '2020 – 2026',
+    location: 'Tychy, Poland',
+    focus:
+      'Obtained the professional title of Technik Programista. INF.03/INF.04 exams and matura; portfolio backends (FlowBoard, PatchGuard) while preparing for junior .NET roles.',
+    certificates: ['INF.03 — 100% practice', 'INF.04 — 100% practice'],
+  },
+]
 
 const languages = [
   'Russian — mother tongue',
@@ -179,35 +203,37 @@ const languages = [
 
 const projectPosts = [
   {
-    title: 'FlowBoard: Flagship Backend (in progress)',
+    title: 'FlowBoard: Flagship Backend (MVP complete)',
     excerpt:
-      'Multi-user Kanban API — Clean Architecture, JWT refresh-token rotation, workspaces with RBAC, boards + cards, SignalR real-time, comments + tags + email, CQRS with MediatR, 241 xUnit tests.',
-    stack: '.NET 10 · ASP.NET Core · EF Core · SQL Server · SignalR · Redis · Docker',
+      'Multi-user Kanban API — Clean Architecture, JWT refresh rotation, workspace RBAC, boards + cards (Dapper reads), SignalR, Hangfire jobs, activity log, comments/tags/email, 277 xUnit + 21 integration tests.',
+    stack: '.NET 10 · ASP.NET Core · EF Core · SQL Server · SignalR · Redis · Hangfire · Docker',
     category: 'Backend',
-    status: 'In progress',
-    proof: 'GitHub · 241 tests · CI',
+    status: 'MVP complete',
+    proof: 'GitHub · 277 unit · 21 integration · CI',
     link: 'https://github.com/Drakonchik1/FlowBoard',
     demo: {
       type: 'api',
       github: 'https://github.com/Drakonchik1/FlowBoard',
       howItWorks: [
         { step: 1, title: 'Register or log in', desc: 'POST /api/auth/register or /login → short-lived JWT access token + refresh token (BCrypt passwords, 5 req/min per IP).' },
-        { step: 2, title: 'Create a workspace', desc: 'Authenticated POST /api/workspaces — you become Owner. Each workspace is an isolated tenant for future boards.' },
-        { step: 3, title: 'Invite teammates', desc: 'POST /api/workspaces/{id}/members with userId + role (Admin/Member/Viewer). Non-members get 404 — no workspace ID leaks.' },
-        { step: 4, title: 'Refresh safely', desc: 'POST /api/auth/refresh rotates the refresh-token family; reused tokens revoke the whole chain (stolen-token protection).' },
+        { step: 2, title: 'Create a workspace', desc: 'Authenticated POST /api/workspaces — you become Owner. Each workspace is an isolated tenant for boards and projects.' },
+        { step: 3, title: 'Boards, cards, real-time', desc: 'Kanban lists/cards with fractional-index ordering; SignalR CardMoved / CommentAdded; optional Redis backplane for multi-instance.' },
+        { step: 4, title: 'Jobs + activity', desc: 'Hangfire sends assignment emails and cleans expired refresh tokens; card activity log via Dapper reads.' },
       ],
-      flow: 'Register → Login → Create workspace → Invite member → Refresh token rotation',
+      flow: 'Auth → Workspace RBAC → Boards/Cards → SignalR → Hangfire email / activity log',
       tryLocal: [
         'docker compose up -d sqlserver',
         'dotnet run --project src/FlowBoard.API',
         '# Open http://localhost:5248/scalar/v1',
-        'dotnet test   # 241 unit tests',
+        'dotnet test   # 277 unit tests (+ 21 integration with Docker)',
       ],
       endpoints: [
         { method: 'POST', path: '/api/auth/register', desc: 'Create account → JWT + refresh token' },
         { method: 'POST', path: '/api/auth/refresh', desc: 'Rotate refresh token (family-based)' },
         { method: 'POST', path: '/api/workspaces', desc: 'Create workspace (Bearer token)' },
-        { method: 'POST', path: '/api/workspaces/{id}/members', desc: 'Invite by userId + role' },
+        { method: 'POST', path: '/api/cards/{id}/move', desc: 'Move card (SignalR CardMoved)' },
+        { method: 'GET', path: '/api/cards/{id}/activity', desc: 'Card activity log' },
+        { method: 'GET', path: '/health/ready', desc: 'Readiness (SQL + Redis)' },
       ],
       sampleLabel: 'Request → layers (from README)',
       sample: `HTTP POST /api/workspaces  (Authorization: Bearer …)
@@ -223,8 +249,9 @@ Response: workspace id + your role = Owner`,
         'JWT 15 min + 7-day refresh with family rotation',
         'RBAC: Owner > Admin > Member > Viewer',
         'Kanban boards + cards · SignalR CardMoved / CommentAdded',
-        'Comments, tags, queued assignment emails (Sprint 6)',
-        'Optional Redis SignalR backplane · Scalar OpenAPI · CI',
+        'Hangfire jobs · card activity log · write rate limits',
+        'Comments, tags, assignment emails · Redis SignalR backplane',
+        'Prod Docker Compose · Railway / Azure Container Apps docs · CI',
       ],
     },
   },
@@ -367,48 +394,58 @@ No row inserted — rule enforced in BookingService, not only in UI.`,
     },
   },
   {
-    title: 'PatchGuard: WPF Diagnostics Desktop',
+    title: 'PatchGuard: WPF Health & Performance Desktop',
     excerpt:
-      'Read-only Windows health checker — modular diagnostic pipeline, EF Core SQLite scan history, multi-agent AI council for repair guides.',
-    stack: '.NET 10 · WPF · MVVM · EF Core SQLite',
+      'Windows health tool — live hardware monitor, game FPS (PresentMon), safe optimizer, read-only diagnostics, ML anomaly detection, local RAG with 16 playbooks, multi-provider AI council (Ollama / OpenAI / Azure / Rules), sensor history + alerts, guided fixes, DPAPI secrets, 336 automated tests.',
+    stack: '.NET 10 · WPF · MVVM · EF Core SQLite · LibreHardwareMonitor · PresentMon · Microsoft.ML · Ollama',
     category: 'Desktop',
-    proof: 'Runnable · dotnet run',
+    proof: 'Runnable · 336 tests',
     link: 'https://github.com/Drakonchik1/PatchGuard',
     demo: {
       type: 'app',
       github: 'https://github.com/Drakonchik1/PatchGuard',
       howItWorks: [
-        { step: 1, title: 'Run a scan', desc: 'Pick a scenario — modular pipeline runs read-only checks (disk, Event Log 48h, Windows Update KBs, services).' },
-        { step: 2, title: 'Save results', desc: 'Findings stored in SQLite via EF Core — scan history you can revisit in the UI.' },
-        { step: 3, title: 'AI council (optional)', desc: 'Technician proposes fixes → Skeptic challenges → Researcher adds web context → Chief writes one manual guide. Works offline with local rules if no API key.' },
-        { step: 4, title: 'You apply fixes', desc: 'App never runs elevated commands — you follow the step-by-step guide yourself (safe by design).' },
+        { step: 1, title: 'Diagnose', desc: 'Pick a scenario (full audit, game check, after Windows Update, quick health) — read-only modules scan OS, disk, memory, temps, CPU/GPU, Event Log, updates.' },
+        { step: 2, title: 'Monitor & FPS', desc: 'Live CPU/GPU sensors via LibreHardwareMonitor with sensor history (SQLite, 7-day rolling); game FPS (avg / 1% low / 0.1% low) via Intel PresentMon. ML anomaly detection (Z-score + Isolation Forest + Microsoft.ML RandomizedPCA).' },
+        { step: 3, title: 'Alerts & guided fixes', desc: 'Threshold alert engine for CPU/GPU temp + load; alerts UI (active + resolved). Guided-fix pipeline: preview → confirm → execute → verify → record.' },
+        { step: 4, title: 'Optimize safely', desc: 'One-click reversible boost: trim working sets, clear temp, empty Recycle Bin, flush DNS — no Windows settings changes.' },
+        { step: 5, title: 'AI council (optional)', desc: 'Multi-provider: Azure OpenAI → OpenAI → Ollama (local) → Rules fallback. Four-agent council with agentic graph, local RAG (16 playbooks), DPAPI secrets, provenance labels. No cloud key required for Ollama/Rules.' },
       ],
-      flow: 'Scan modules → findings → SQLite history → council debate → manual repair guide',
+      flow: 'Scan → findings + health score → history → alerts → guided fixes → optional AI guide · Monitor / FPS / Optimize in sidebar',
       tryLocal: [
         'git clone https://github.com/Drakonchik1/PatchGuard',
-        'cd PatchGuard/PatchGuard',
-        'dotnet run',
-        '# Optional: appsettings.Development.json for OpenAI + Tavily',
+        'dotnet run --project PatchGuard/PatchGuard.csproj',
+        'dotnet test PatchGuard.Tests/PatchGuard.Tests.csproj   # 336 tests',
+        '# Optional: ollama pull llama3.2:3b for local AI',
       ],
       screens: [
-        { label: 'Home / Scan', desc: 'Choose diagnostic scenario and start pipeline' },
-        { label: 'Findings', desc: 'Severity-tagged issues from each module' },
-        { label: 'History', desc: 'Past scans from EF Core SQLite' },
-        { label: 'Council + Guide', desc: 'Multi-agent debate → unified manual steps' },
+        { label: 'Dashboard', desc: 'Health score, next action, scan history trends, live snapshot, alert summary' },
+        { label: 'Diagnose', desc: 'Scenario → scan → findings → optional AI guidance with collapsible agent trace' },
+        { label: 'Live Monitor / Game FPS', desc: 'Hardware sensors + sensor history + ML anomaly banner + PresentMon FPS' },
+        { label: 'Alerts', desc: 'Active + recently resolved threshold alerts' },
+        { label: 'Optimize / Settings', desc: 'Safe boost actions + provider radio (Cloud/Ollama/Rules) + Azure fields + DPAPI' },
       ],
-      sampleLabel: 'Diagnostic modules (from README)',
-      sample: `✓ OS build info
-✓ Disk space (C:)
-✓ Windows Update history (KB list)
-✓ Event Log — errors last 48h
-✓ Update services (read-only)
+      sampleLabel: 'What PatchGuard covers',
+      sample: `Diagnostics (read-only): OS, disk, memory, temps, CPU/GPU, WU, Event Log
+Live monitor: LibreHardwareMonitor sensors + 7-day sensor history (SQLite)
+ML anomaly: Z-score + Isolation Forest + Microsoft.ML RandomizedPCA
+Game FPS: PresentMon (avg / 1% low / 0.1% low)
+Alerts: threshold engine (CPU/GPU temp + load) + guided-fix pipeline
+Optimize: reversible only — trim, temp, Recycle Bin, DNS
+AI: multi-provider council (Azure/OpenAI/Ollama/Rules) + local RAG (16 playbooks)
+Secrets: DPAPI — no plaintext keys in config
 
-No admin elevation — observation only.`,
+336 xUnit tests — navigation, scoring, history, AI privacy, ML, cloud boundaries, UI contracts.`,
       highlights: [
-        'MVVM + DI — modular IDiagnosticModule plugins',
-        'WPF UI over .NET 10',
-        'Optional OpenAI + Tavily; local council fallback',
-        'EF Core SQLite for scan history',
+        'MVVM (CommunityToolkit) + DI · modular diagnostic pipeline',
+        'Deterministic health score (risk-capped-v1) + EF Core SQLite history',
+        'ML anomaly detection: Z-score + Isolation Forest + Microsoft.ML',
+        'Multi-provider AI: Azure OpenAI / OpenAI / Ollama / Rules with agentic graph',
+        'Local RAG with 16 playbooks + hybrid keyword+embedding retrieval',
+        'DPAPI secret storage — keys migrate from config to encrypted store',
+        'Sensor history + threshold alerts + guided-fix pipeline',
+        'Privacy by default — sanitized categories, provenance labels, consent controls',
+        '336 automated tests covering core flows, ML, cloud boundaries, security',
       ],
     },
   },
@@ -1270,15 +1307,21 @@ function App() {
 
           <section className="card">
             <h2>Education</h2>
-            <p className="education-school">{education.school}</p>
-            <p className="education-meta">{education.program}</p>
-            <p className="education-meta">{education.period} · Tychy, Poland</p>
-            <p className="education-focus">{education.focus}</p>
-            <ul className="education-certs">
-              {education.certificates.map((cert) => (
-                <li key={cert}>{cert}</li>
-              ))}
-            </ul>
+            {education.map((edu) => (
+              <div key={edu.school} className="education-entry">
+                <p className="education-school">{edu.school}</p>
+                <p className="education-meta">{edu.program}</p>
+                <p className="education-meta">{edu.period} · {edu.location}</p>
+                <p className="education-focus">{edu.focus}</p>
+                {edu.certificates.length > 0 && (
+                  <ul className="education-certs">
+                    {edu.certificates.map((cert) => (
+                      <li key={cert}>{cert}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
           </section>
 
           <section className="card">
