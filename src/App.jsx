@@ -175,13 +175,15 @@ const profile = {
   telegram: 'https://t.me/Drakon_v2',
   whatsapp: 'https://wa.me/48576468614',
   summary:
-    'Junior .NET developer in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard MVP: Clean Architecture, Kanban, SignalR, Hangfire, JWT, 277 unit tests. PatchGuard: WPF diagnostics, ML anomaly detection, local RAG, multi-provider AI council, 336 tests. INF.03 / INF.04 passed. Available immediately — hybrid Katowice area or remote within Poland.',
+    'Junior .NET in Tychy — ASP.NET Core, EF Core, WPF. FlowBoard (Clean Architecture, SignalR, Hangfire, 277 tests) and PatchGuard (WPF diagnostics, ML, RAG, 336 tests). INF.03 / INF.04 passed.',
+  tagline: 'Junior .NET developer — ASP.NET Core, EF Core, WPF',
 }
 
 const heroKpis = [
-  { value: '277', label: 'xUnit tests (FlowBoard)' },
-  { value: '336', label: 'tests (PatchGuard)' },
-  { value: 'Now', label: 'Available immediately' },
+  { value: '277', label: 'FlowBoard tests' },
+  { value: '336', label: 'PatchGuard tests' },
+  { value: '5', label: 'projects' },
+  { value: 'C1', label: 'EN/PL' },
 ]
 
 const currentlyBuilding = {
@@ -195,7 +197,6 @@ const currentlyBuilding = {
 }
 
 const lookingFor = [
-  'Available immediately',
   'Junior .NET backend (ASP.NET Core)',
   'Hybrid — Katowice area',
   'Remote within Poland',
@@ -1304,30 +1305,46 @@ function App() {
       <section className="hero card hero-with-rotors">
         <span className="card-rotor card-rotor--tl" aria-hidden="true" />
         <span className="card-rotor card-rotor--br" aria-hidden="true" />
-        <div className="hero-main">
-          <p className="eyebrow">Junior .NET · ASP.NET Core, EF Core, WPF</p>
-          <h1>{profile.name}</h1>
-          <p className="role">{profile.role}</p>
-          <p className="summary">{profile.summary}</p>
-          <div className="chips">
-            <span>{profile.location}</span>
-            <a href={`mailto:${profile.email}`}>{profile.email}</a>
-          </div>
+        <p className="status-badge">
+          <span className="status-dot" aria-hidden="true" />
+          Available now · Katowice hybrid / remote PL
+        </p>
+        <h1>{profile.name}</h1>
+        <p className="hero-tagline">{profile.tagline}</p>
+        <p className="summary hero-summary">{profile.summary}</p>
+        <div className="hero-cta">
+          <a className="btn btn--primary" href="#projects">
+            View projects
+          </a>
+          <a
+            className="btn btn--ghost"
+            href={profile.github}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
+            </svg>
+            GitHub
+          </a>
+          <a className="btn btn--ghost" href="/Pavlo_Dorofieiev_CV.pdf" download>
+            Download CV
+          </a>
         </div>
-        <aside className="hero-side">
-          <p className="eyebrow">At a glance</p>
-          <div className="stats-grid">
-            {heroKpis.map((kpi) => (
-              <article key={kpi.label}>
-                <p className="kpi-value">{kpi.value}</p>
-                <p className="kpi-label">{kpi.label}</p>
-              </article>
-            ))}
-          </div>
-          <p className="availability">
-            Available immediately. Hybrid Katowice area or remote within Poland.
-          </p>
-        </aside>
+        <div className="kpi-strip" role="list">
+          {heroKpis.map((kpi) => (
+            <div key={kpi.label} className="kpi-cell" role="listitem">
+              <p className="kpi-value">{kpi.value}</p>
+              <p className="kpi-label">{kpi.label}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="card experience section-with-rotors" id="experience">
@@ -1501,7 +1518,7 @@ function App() {
       <section className="card cta" id="contact">
         <h2>Contact</h2>
         <p className="summary">
-          Available immediately for junior .NET roles — hybrid Katowice area or remote within Poland.
+          Open to junior .NET roles — hybrid Katowice area or remote within Poland.
           Code on GitHub under each project.
         </p>
         <div className="chips">
