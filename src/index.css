@@ -1,6 +1,45 @@
 :root {
   color-scheme: dark;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  /* Fonts */
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+  --space-8: 3rem;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* Neutrals */
+  --neutral-50: #f4fbff;
+  --neutral-100: #eef7ff;
+  --neutral-200: #d0e5f8;
+  --neutral-300: #b7d5ed;
+  --neutral-400: #9fc0dc;
+  --neutral-500: #89a6bf;
+  --neutral-700: #0b2a42;
+  --neutral-800: #081a2e;
+  --neutral-900: #030d18;
+
+  /* Accent placeholders (season palette wired later) */
+  --accent: #9ae3ff;
+  --accent-muted: rgba(154, 227, 255, 0.22);
+  --accent-strong: #a6deff;
+
+  font-family: var(--font-sans);
   --card-season-bg: rgba(8, 26, 46, 0.72);
   --season-glow-inner: rgba(160, 215, 255, 0.28);
   --season-glow-outer: rgba(200, 235, 255, 0.14);

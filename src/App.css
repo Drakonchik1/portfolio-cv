@@ -1,3 +1,87 @@
+/* ── Base primitives (tokens from index.css :root) ─────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--neutral-100);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.btn--primary {
+  background: var(--accent-muted);
+  border-color: rgba(154, 227, 255, 0.45);
+  color: var(--neutral-50);
+}
+
+.btn--primary:hover {
+  background: rgba(154, 227, 255, 0.32);
+  border-color: var(--accent);
+}
+
+.btn--ghost {
+  border-color: rgba(200, 231, 255, 0.26);
+  background: rgba(206, 234, 255, 0.08);
+  color: var(--neutral-100);
+}
+
+.btn--ghost:hover {
+  background: rgba(167, 227, 255, 0.22);
+  border-color: rgba(167, 227, 255, 0.55);
+}
+
+.btn--icon {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.btn--icon:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.tag {
+  display: inline-block;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(192, 230, 255, 0.36);
+  color: var(--accent);
+  font-size: 0.74rem;
+  padding: 0.15rem 0.5rem;
+}
+
+.chip {
+  display: inline-block;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(201, 230, 255, 0.33);
+  background: rgba(210, 235, 255, 0.08);
+  color: var(--neutral-50);
+  font-size: 0.86rem;
+  padding: 0.35rem 0.74rem;
+  text-decoration: none;
+}
+
+.section {
+  display: block;
+}
+
+.section-head {
+  margin: 0 0 var(--space-3);
+  color: var(--neutral-50);
+  font-family: var(--font-display);
+}
+
 /* Behind particles (z-0); .page sits above at z-3 */
 .peaks-layer {
   position: relative;
