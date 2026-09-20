@@ -80,7 +80,7 @@ const SEASON_CONFIG = {
   },
 }
 
-const NAV_SECTION_IDS = ['experience', 'projects', 'approach', 'contact']
+const NAV_SECTION_IDS = ['experience', 'projects', 'about', 'contact']
 
 function SeasonIcon({ season, size = 18 }) {
   const label = SEASON_CONFIG[season]?.label ?? season
@@ -1320,7 +1320,7 @@ function App() {
           <div className="top-links">
             <a href="#experience">Experience</a>
             <a href="#projects">Projects</a>
-            <a href="#approach">Approach</a>
+            <a href="#about">About</a>
             <a href="#contact">Contact</a>
           </div>
           <div className="season-picker" role="group" aria-label="Season theme">
@@ -1468,61 +1468,62 @@ function App() {
         </div>
       </section>
 
-      <section className="card section-with-rotors">
+      <section className="card skills section-with-rotors" id="skills">
         <span className="card-rotor card-rotor--br-small" aria-hidden="true" />
         <h2>Skills</h2>
-        {skillGroups.map((group) => (
-          <div key={group.label} className="skill-group">
-            <p className="skill-group-label">{group.label}</p>
-            <div className="stack-cloud">
-              {group.items.map((item) => (
-                <span key={item}>{item}</span>
+        <div className="skills-grid">
+          {skillGroups.map((group) => (
+            <div
+              key={group.label}
+              className={`skill-group${group.label === 'Familiar' ? ' skill-group--familiar' : ''}`}
+            >
+              <p className="skill-group-label">{group.label}</p>
+              <div className="stack-cloud">
+                {group.items.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card about section-with-rotors" id="about">
+        <span className="card-rotor card-rotor--tr" aria-hidden="true" />
+        <div className="about-grid">
+          <div className="about-col">
+            <h2>How I work</h2>
+            <div className="approach-stack">
+              {approachPillars.map((item) => (
+                <article key={item.title} className="approach-item">
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </article>
               ))}
             </div>
           </div>
-        ))}
-      </section>
-
-      <section className="card">
-        <h2>Soft skills</h2>
-        <ul className="looking-list">
-          {softSkills.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="card">
-        <h2>Open to</h2>
-        <ul className="looking-list">
-          {lookingFor.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="card">
-        <h2>Languages</h2>
-        <ul className="language-list">
-          {languages.map((lang) => (
-            <li key={lang}>{lang}</li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="card approach section-with-rotors" id="approach">
-        <span className="card-rotor card-rotor--tr" aria-hidden="true" />
-        <h2>How I work</h2>
-        <p className="approach-lead">
-          Habits from Techcom and personal projects — not repeated elsewhere on this page.
-        </p>
-        <div className="approach-grid">
-          {approachPillars.map((item) => (
-            <article key={item.title} className="approach-item">
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
-            </article>
-          ))}
+          <div className="about-col">
+            <h2>Open to</h2>
+            <ul className="looking-list">
+              {lookingFor.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="about-col">
+            <h2>Languages</h2>
+            <ul className="language-list">
+              {languages.map((lang) => (
+                <li key={lang}>{lang}</li>
+              ))}
+            </ul>
+            <h2 className="about-subhead">Soft skills</h2>
+            <ul className="looking-list">
+              {softSkills.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 

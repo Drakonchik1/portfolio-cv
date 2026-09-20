@@ -723,7 +723,8 @@ button:focus-visible {
 
 .projects h2,
 .cta h2,
-.approach h2,
+.skills h2,
+.about h2,
 .card > h2 {
   margin: 0 0 0.65rem;
   color: var(--text);
@@ -837,18 +838,37 @@ button:focus-visible {
   color: #ffd68a;
 }
 
-.approach-lead {
-  margin: 0 0 1rem;
-  max-width: 52rem;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  line-height: 1.55;
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem 1rem;
 }
 
-.approach-grid {
+.skill-group--familiar {
+  opacity: 0.7;
+}
+
+.about-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
+  gap: 1.25rem;
+}
+
+.about-col {
+  min-width: 0;
+}
+
+.about-col > h2 {
+  margin: 0 0 0.65rem;
+}
+
+.about-subhead {
+  margin: 1.15rem 0 0.65rem;
+}
+
+.approach-stack {
+  display: grid;
+  gap: 0.65rem;
 }
 
 .approach-item {
@@ -994,11 +1014,8 @@ button:focus-visible {
 }
 
 .skill-group {
-  margin-bottom: 0.75rem;
-}
-
-.skill-group:last-child {
-  margin-bottom: 0;
+  margin: 0;
+  min-width: 0;
 }
 
 .skill-group-label {
@@ -1072,7 +1089,7 @@ button:focus-visible {
     grid-template-columns: 1fr;
   }
 
-  .approach-grid {
+  .about-grid {
     grid-template-columns: 1fr;
   }
 }
