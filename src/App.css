@@ -118,6 +118,7 @@
 }
 
 .mtn-band svg path {
+  shape-rendering: geometricPrecision;
   transition: fill 0.8s cubic-bezier(0.33, 1, 0.68, 1);
 }
 

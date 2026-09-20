@@ -690,23 +690,33 @@ function lcg(seed) {
   return () => { s = (Math.imul(1664525, s) + 1013904223) >>> 0; return s / 4294967295 }
 }
 
+/** Coarse pointer or low core count → halve decoration / particle density. */
+function decorDensityScale() {
+  if (typeof window === 'undefined') return 1
+  const coarse = window.matchMedia('(pointer: coarse)').matches
+  const cores = navigator.hardwareConcurrency || 8
+  return coarse || cores <= 4 ? 0.5 : 1
+}
+
+/** Prefer left/right edges so center content stays clearer. */
+const genXEdge = (rng, W) => (rng() < 0.5 ? rng() * W * 0.3 : W - rng() * W * 0.3)
+
 // Season placement config — used inside SideDecorations via useMemo
 const SEASON_PLACEMENT = {
-  winter: { count: 135, minSz: 14, maxSz: 52, gap: 1.2,
-    genX: (rng, W) => rng() * W,
+  winter: { count: 70, minSz: 14, maxSz: 52, gap: 1.2,
+    genX: genXEdge,
     genY: (rng, H) => rng() * H,
   },
-  spring: { count: 165, minSz: 12, maxSz: 40, gap: 1.0,
-    // x: full canvas — flowers appear everywhere, not just at edges
-    genX: (rng, W) => rng() * W,
+  spring: { count: 80, minSz: 12, maxSz: 40, gap: 1.0,
+    genX: genXEdge,
     genY: (rng, H) => H * (0.04 + Math.pow(rng(), 0.6) * 0.92),
   },
-  summer: { count: 128, minSz: 20, maxSz: 46, gap: 1.25,
-    genX: (rng, W) => rng() * W,
+  summer: { count: 60, minSz: 20, maxSz: 46, gap: 1.25,
+    genX: genXEdge,
     genY: (rng, H) => rng() * H * 0.96 + H * 0.02,
   },
-  autumn: { count: 135, minSz: 12, maxSz: 48, gap: 1.0,
-    genX: (rng, W) => rng() * W,
+  autumn: { count: 70, minSz: 12, maxSz: 48, gap: 1.0,
+    genX: genXEdge,
     genY: (rng, H) => {
       const r = rng()
       return H * (r < 0.28 ? rng() * 0.27 : r < 0.52 ? 0.73 + rng() * 0.24 : 0.15 + rng() * 0.60)
@@ -719,7 +729,7 @@ const AMBIENT_ROT_SEED = { winter: 0xa11b001, spring: 0xa11b002, summer: 0xa11b0
 function AmbientRotors({ season }) {
   const items = useMemo(() => {
     const rng = lcg(AMBIENT_ROT_SEED[season])
-    const n = 16
+    const n = Math.max(1, Math.round(8 * decorDensityScale()))
     return Array.from({ length: n }, (_, i) => ({
       id: `${season}-ar-${i}`,
       topPct: 4 + rng() * 90,
@@ -790,8 +800,9 @@ function ParticleField({ season }) {
     ctx.globalCompositeOperation = 'source-over'
 
     const particles = []
-    // Autumn: many thin streaks; other seasons: fewer, larger motes
-    const COUNT = season === 'autumn' ? 240 : season === 'winter' ? 95 : 88
+    // Autumn: many thin streaks; other seasons: fewer, larger motes (−25% vs prior non-autumn bases)
+    const baseCount = season === 'autumn' ? 150 : season === 'winter' ? 71 : 66
+    const COUNT = Math.max(1, Math.round(baseCount * decorDensityScale()))
     const isAutumn = season === 'autumn'
 
     let alive = true
@@ -1015,12 +1026,13 @@ function SideDecorations({ viewport, season }) {
     const cfg   = SEASON_PLACEMENT[season]
     const SEEDS = { winter: 0x5f3759, spring: 0x9a2b1c, summer: 0x4e7f3d, autumn: 0xb3c921 }
     const rng   = lcg(SEEDS[season])
+    const count = Math.max(1, Math.round(cfg.count * decorDensityScale()))
 
     const placed = []  // { x, y, r }
     const out    = []
     let id = 0
 
-    for (let i = 0; i < cfg.count; i++) {
+    for (let i = 0; i < count; i++) {
       const size = cfg.minSz + rng() * (cfg.maxSz - cfg.minSz)
       const r    = size * 0.5 * cfg.gap   // collision radius (includes padding)
 
@@ -1314,12 +1326,11 @@ function App() {
       {/* Peaks = back-most art; particles portal mounts above this, .page above both */}
       <div className="peaks-layer peaks-layer--top" aria-hidden="true">
         <div className="mtn-band mtn-band-top">
-          {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
+          {(() => { const [c0, c1, c2] = SEASON_CONFIG[season].mtnColors; return (
             <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 92  Q350 8   720 98  Q1050 8   1440 85  L1440 380 L0 380 Z" fill={c0}/>
-              <path d="M0 148 Q450 62  720 155 Q1100 62  1440 140 L1440 380 L0 380 Z" fill={c1}/>
-              <path d="M0 202 Q300 118 640 208 Q980  118 1440 195 L1440 380 L0 380 Z" fill={c2}/>
-              <path d="M0 258 Q480 175 720 262 Q1050 178 1440 248 L1440 380 L0 380 Z" fill={c3}/>
+              <path d="M0 110 L160 28 L300 95 L480 18 L640 88 L800 32 L960 100 L1120 22 L1280 85 L1440 45 L1440 380 L0 380 Z" fill={c0}/>
+              <path d="M0 165 L140 78 L280 155 L450 55 L620 148 L790 70 L960 140 L1130 60 L1300 150 L1440 95 L1440 380 L0 380 Z" fill={c1}/>
+              <path d="M0 220 L180 140 L360 210 L540 125 L720 200 L900 135 L1080 205 L1260 130 L1440 190 L1440 380 L0 380 Z" fill={c2}/>
             </svg>
           )})()}
         </div>
@@ -1660,12 +1671,11 @@ function App() {
 
       <div className="peaks-layer peaks-layer--bottom" aria-hidden="true">
         <div className="mtn-band mtn-band-bottom">
-          {(() => { const [c0,c1,c2,c3] = SEASON_CONFIG[season].mtnColors; return (
+          {(() => { const [c0, c1, c2] = SEASON_CONFIG[season].mtnColors; return (
             <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 305 Q350 362 720 298 Q1050 360 1440 312 L1440 0 L0 0 Z" fill={c0}/>
-              <path d="M0 250 Q450 300 720 244 Q1100 298 1440 255 L1440 0 L0 0 Z" fill={c1}/>
-              <path d="M0 196 Q300 242 640 190 Q980  240 1440 200 L1440 0 L0 0 Z" fill={c2}/>
-              <path d="M0 145 Q480 188 720 148 Q1050 185 1440 152 L1440 0 L0 0 Z" fill={c3}/>
+              <path d="M0 270 L160 352 L300 285 L480 362 L640 292 L800 348 L960 280 L1120 358 L1280 295 L1440 335 L1440 0 L0 0 Z" fill={c0}/>
+              <path d="M0 215 L140 302 L280 225 L450 325 L620 232 L790 310 L960 240 L1130 320 L1300 230 L1440 285 L1440 0 L0 0 Z" fill={c1}/>
+              <path d="M0 160 L180 240 L360 170 L540 255 L720 180 L900 245 L1080 175 L1260 250 L1440 190 L1440 0 L0 0 Z" fill={c2}/>
             </svg>
           )})()}
         </div>
