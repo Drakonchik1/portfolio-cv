@@ -572,56 +572,48 @@ function buildKochFlake(cx, cy, r, depth) {
   return segs
 }
 
-// Precompute two detail levels — reused across all snowflake instances
-const FLAKE_D3 = buildKochFlake(50, 50, 44, 3) // full crystal detail
-const FLAKE_D2 = buildKochFlake(50, 50, 44, 2) // simpler / distant
+// Precompute two detail levels — path strings keep DOM to 1 element per flake
+const FLAKE_D3 = buildKochFlake(50, 50, 44, 3)
+const FLAKE_D2 = buildKochFlake(50, 50, 44, 2)
+const FLAKE_PATH_D3 = FLAKE_D3.map((s) => `M${s.x1.toFixed(2)} ${s.y1.toFixed(2)}L${s.x2.toFixed(2)} ${s.y2.toFixed(2)}`).join('')
+const FLAKE_PATH_D2 = FLAKE_D2.map((s) => `M${s.x1.toFixed(2)} ${s.y1.toFixed(2)}L${s.x2.toFixed(2)} ${s.y2.toFixed(2)}`).join('')
 
 // ─── Seasonal decoration SVGs ─────────────────────────────────────────────────
 // Spring: 5-petal apple blossom
-function AppleBlossomSVG({ size }) {
+function AppleBlossomSVG({ size, className, style }) {
   const cx = 50, cy = 50, off = 19
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" style={{ overflow: 'visible' }}>
+    <svg className={className} style={{ overflow: 'visible', ...style }} width={size} height={size} viewBox="0 0 100 100">
       {[0,72,144,216,288].map((deg, i) => {
         const a = (deg - 90) * Math.PI / 180
         const px = cx + off * Math.cos(a), py = cy + off * Math.sin(a)
         return (
           <ellipse key={i} cx={px} cy={py} rx="9" ry="19"
             transform={`rotate(${deg},${px},${py})`}
-            fill="rgba(255,215,225,0.88)" stroke="rgba(220,140,165,0.5)" strokeWidth="0.8"/>
+            fill="rgba(255,215,225,0.88)" stroke="var(--side-glow)" strokeWidth="1.15" strokeOpacity="0.55"/>
         )
       })}
       <circle cx={cx} cy={cy} r="7.5" fill="rgba(255,228,65,0.92)" stroke="rgba(200,158,28,0.55)" strokeWidth="0.9"/>
-      {[0,72,144,216,288].map((deg, i) => {
-        const a = (deg - 90) * Math.PI / 180
-        return <line key={i} x1={cx} y1={cy} x2={cx + 8*Math.cos(a)} y2={cy + 8*Math.sin(a)}
-          stroke="rgba(210,160,40,0.6)" strokeWidth="0.7"/>
-      })}
     </svg>
   )
 }
 
 // Summer: sunflower
-function SunflowerSVG({ size }) {
-  const cx = 50, cy = 50, off = 20, n = 13
+function SunflowerSVG({ size, className, style }) {
+  const cx = 50, cy = 50, off = 20, n = 5
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" style={{ overflow: 'visible' }}>
+    <svg className={className} style={{ overflow: 'visible', ...style }} width={size} height={size} viewBox="0 0 100 100">
       {Array.from({ length: n }, (_, i) => {
         const deg = i * (360 / n)
         const a = (deg - 90) * Math.PI / 180
         const px = cx + off * Math.cos(a), py = cy + off * Math.sin(a)
         return (
-          <ellipse key={i} cx={px} cy={py} rx="7" ry="17"
+          <ellipse key={i} cx={px} cy={py} rx="9" ry="19"
             transform={`rotate(${deg},${px},${py})`}
-            fill="rgba(255,205,72,0.9)" stroke="rgba(200,140,28,0.5)" strokeWidth="0.7"/>
+            fill="rgba(255,205,72,0.9)" stroke="var(--side-glow)" strokeWidth="1.05" strokeOpacity="0.5"/>
         )
       })}
       <circle cx={cx} cy={cy} r="13" fill="rgba(42,28,12,0.92)" stroke="rgba(24,16,6,0.55)" strokeWidth="0.8"/>
-      {Array.from({ length: 8 }, (_, i) => {
-        const a = (i * 45 - 90) * Math.PI / 180
-        return <circle key={i} cx={cx + 8*Math.cos(a)} cy={cy + 8*Math.sin(a)} r="1.5"
-          fill="rgba(255,228,140,0.78)"/>
-      })}
     </svg>
   )
 }
@@ -634,52 +626,47 @@ const LEAF_PALETTES = [
   { fill: 'rgba(168,118,42,0.92)', stroke: 'rgba(105,78,28,0.55)', vein: 'rgba(88,62,22,0.45)' },
 ]
 
-function MapleLeafSVG({ size, variant = 0 }) {
+function MapleLeafSVG({ size, variant = 0, className, style }) {
   const { fill, stroke, vein } = LEAF_PALETTES[variant % 3]
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" style={{ overflow: 'visible' }}>
+    <svg className={className} style={{ overflow: 'visible', ...style }} width={size} height={size} viewBox="0 0 100 100">
       <path
         d="M50 6 L53 22 L66 16 L59 30 L76 26 L66 40 L80 44 L66 50 L74 64 L58 56 L58 74 L50 66 L42 74 L42 56 L26 64 L34 50 L20 44 L34 40 L24 26 L41 30 L34 16 L47 22 Z"
-        fill={fill} stroke={stroke} strokeWidth="0.9"/>
+        fill={fill} stroke="var(--side-glow)" strokeWidth="1.4" strokeOpacity="0.55"/>
       <line x1="50" y1="66" x2="50" y2="90" stroke={stroke} strokeWidth="1.6" strokeLinecap="round"/>
       <line x1="50" y1="38" x2="34" y2="50" stroke={vein} strokeWidth="0.7"/>
       <line x1="50" y1="38" x2="66" y2="50" stroke={vein} strokeWidth="0.7"/>
-      <line x1="50" y1="52" x2="38" y2="62" stroke={vein} strokeWidth="0.6"/>
-      <line x1="50" y1="52" x2="62" y2="62" stroke={vein} strokeWidth="0.6"/>
     </svg>
   )
 }
 
-function SeasonDecoSVG({ season, size, detail, id = 0 }) {
+function SeasonDecoSVG({ season, size, detail, id = 0, className, style }) {
   switch (season) {
-    case 'spring': return <AppleBlossomSVG size={size} />
-    case 'summer': return <SunflowerSVG size={size} />
-    case 'autumn': return <MapleLeafSVG size={size} variant={id % 3} />
-    default:       return <KochSnowflakeSVG size={size} detail={detail} />
+    case 'spring': return <AppleBlossomSVG size={size} className={className} style={style} />
+    case 'summer': return <SunflowerSVG size={size} className={className} style={style} />
+    case 'autumn': return <MapleLeafSVG size={size} variant={id % 3} className={className} style={style} />
+    default:       return <KochSnowflakeSVG size={size} detail={detail} className={className} style={style} />
   }
 }
 
-function KochSnowflakeSVG({ size, detail = 3 }) {
-  const segs = detail === 3 ? FLAKE_D3 : FLAKE_D2
+function KochSnowflakeSVG({ size, detail = 3, className, style }) {
+  const d = detail === 3 ? FLAKE_PATH_D3 : FLAKE_PATH_D2
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" style={{ overflow: 'visible' }}>
-      {/* Tiny center hexagon */}
+    <svg className={className} style={{ overflow: 'visible', ...style }} width={size} height={size} viewBox="0 0 100 100">
+      <path
+        d={d}
+        fill="none"
+        stroke="rgba(230,248,255,0.92)"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
       <polygon
         points="50,43.5 56.5,47 56.5,53 50,56.5 43.5,53 43.5,47"
-        stroke="rgba(220,245,255,0.70)"
-        strokeWidth="0.9"
+        stroke="var(--side-glow)"
+        strokeWidth="2.2"
+        strokeOpacity="0.45"
         fill="none"
       />
-      {segs.map((s, i) => (
-        <line
-          key={i}
-          x1={s.x1} y1={s.y1}
-          x2={s.x2} y2={s.y2}
-          stroke="rgba(230,248,255,0.92)"
-          strokeWidth={s.sw}
-          strokeLinecap="round"
-        />
-      ))}
     </svg>
   )
 }
@@ -707,7 +694,7 @@ const SEASON_PLACEMENT = {
     genX: genXEdge,
     genY: (rng, H) => rng() * H,
   },
-  spring: { count: 80, minSz: 12, maxSz: 40, gap: 1.0,
+  spring: { count: 64, minSz: 12, maxSz: 40, gap: 1.0,
     genX: genXEdge,
     genY: (rng, H) => H * (0.04 + Math.pow(rng(), 0.6) * 0.92),
   },
@@ -788,16 +775,9 @@ function ParticleField({ season }) {
     wrap?.querySelectorAll('canvas.snow-field').forEach((c) => {
       if (c !== canvas) c.remove()
     })
-    const w0 = window.innerWidth
-    const h0 = window.innerHeight
-    // Reset bitmap so no previous season pixels linger on the same element
-    canvas.width = w0
-    canvas.height = h0
+
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
-    ctx.setTransform(1, 0, 0, 1, 0, 0)
-    ctx.globalAlpha = 1
-    ctx.globalCompositeOperation = 'source-over'
 
     const particles = []
     // Autumn: many thin streaks; other seasons: fewer, larger motes (−25% vs prior non-autumn bases)
@@ -806,11 +786,31 @@ function ParticleField({ season }) {
     const isAutumn = season === 'autumn'
 
     let alive = true
+    let cssW = 0
+    let cssH = 0
+
+    const applySize = () => {
+      const w = window.innerWidth
+      const h = window.innerHeight
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+      cssW = w
+      cssH = h
+      canvas.width = Math.max(1, Math.floor(w * dpr))
+      canvas.height = Math.max(1, Math.floor(h * dpr))
+      canvas.style.width = `${w}px`
+      canvas.style.height = `${h}px`
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx.globalAlpha = 1
+      ctx.globalCompositeOperation = 'source-over'
+      return dpr
+    }
+
+    applySize()
 
     const seedParticles = () => {
       particles.length = 0
-      const w = canvas.width
-      const h = canvas.height
+      const w = cssW
+      const h = cssH
       if (w < 1 || h < 1) return
       for (let i = 0; i < COUNT; i++) {
         if (isAutumn) {
@@ -848,14 +848,10 @@ function ParticleField({ season }) {
 
     const resize = () => {
       if (session !== __particleCanvasSession) return
-      const w = window.innerWidth
-      const h = window.innerHeight
-      const dimsChanged = canvas.width !== w || canvas.height !== h
-      if (dimsChanged) {
-        canvas.width = w
-        canvas.height = h
-      }
-      if (dimsChanged || particles.length === 0) {
+      const prevW = cssW
+      const prevH = cssH
+      applySize()
+      if (cssW !== prevW || cssH !== prevH || particles.length === 0) {
         seedParticles()
       }
     }
@@ -951,8 +947,8 @@ function ParticleField({ season }) {
         cancelParticleRaf()
         return
       }
-      const cw = canvas.width
-      const ch = canvas.height
+      const cw = cssW
+      const ch = cssH
       ctx.clearRect(0, 0, cw, ch)
       if (cw >= 1 && ch >= 1) {
         for (let i = 0, n = particles.length; i < n; i++) {
@@ -984,6 +980,7 @@ function ParticleField({ season }) {
       window.removeEventListener('resize', resize)
       try {
         if (canvas.width > 0 && canvas.height > 0) {
+          ctx.setTransform(1, 0, 0, 1, 0, 0)
           ctx.clearRect(0, 0, canvas.width, canvas.height)
         }
       } catch {
@@ -996,26 +993,9 @@ function ParticleField({ season }) {
 }
 
 function SideDecorations({ viewport, season }) {
-  const [mouse, setMouse] = useState({ x: 0, y: 0 })
   const glow = SEASON_CONFIG[season].sideGlow
-
-  useEffect(() => {
-    let raf = 0
-    let latest = { x: 0, y: 0 }
-    const flush = () => {
-      raf = 0
-      setMouse({ x: latest.x, y: latest.y })
-    }
-    const onMove = (e) => {
-      latest = { x: e.clientX, y: e.clientY }
-      if (!raf) raf = requestAnimationFrame(flush)
-    }
-    window.addEventListener('pointermove', onMove, { passive: true })
-    return () => {
-      window.removeEventListener('pointermove', onMove)
-      cancelAnimationFrame(raf)
-    }
-  }, [])
+  const flakeRefs = useRef([])
+  const flakesRef = useRef([])
 
   // Rejection-sampling packer: place each decoration randomly, retry if it
   // overlaps anything already placed (using actual pixel distances).
@@ -1064,43 +1044,85 @@ function SideDecorations({ viewport, season }) {
     return out
   }, [season, viewport.width, viewport.height])
 
-  return (
-    <div className="side-snowflakes season-deco-enter" aria-hidden="true">
-      {flakes.map((flake) => {
-        const dist = Math.hypot(mouse.x - flake.x, mouse.y - flake.y)
+  flakesRef.current = flakes
+
+  // Apply base angles when flake set changes (no React state for pointer)
+  useLayoutEffect(() => {
+    flakeRefs.current.length = flakes.length
+    const nodes = flakeRefs.current
+    for (let i = 0; i < flakes.length; i++) {
+      const el = nodes[i]
+      if (!el) continue
+      el.style.transform = `translate(-50%, -50%) rotate(${flakes[i].baseAngle.toFixed(1)}deg)`
+    }
+  }, [flakes])
+
+  // Pointer → DOM transforms only (rAF-coalesced); zero React commits
+  useEffect(() => {
+    let raf = 0
+    let latest = { x: 0, y: 0 }
+    const flush = () => {
+      raf = 0
+      const mx = latest.x
+      const my = latest.y
+      const list = flakesRef.current
+      const nodes = flakeRefs.current
+      for (let i = 0; i < list.length; i++) {
+        const flake = list[i]
+        const el = nodes[i]
+        if (!el) continue
+        const dist = Math.hypot(mx - flake.x, my - flake.y)
         const angle =
           dist < 220
-            ? (Math.atan2(mouse.y - flake.y, mouse.x - flake.x) * 180) / Math.PI
+            ? (Math.atan2(my - flake.y, mx - flake.x) * 180) / Math.PI
             : flake.baseAngle
+        el.style.transform = `translate(-50%, -50%) rotate(${angle.toFixed(1)}deg)`
+      }
+    }
+    const onMove = (e) => {
+      latest = { x: e.clientX, y: e.clientY }
+      if (!raf) raf = requestAnimationFrame(flush)
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  return (
+    <div
+      className="side-snowflakes season-deco-enter"
+      aria-hidden="true"
+      style={{ '--side-glow': glow }}
+    >
+      {flakes.map((flake, i) => {
         const spinSec = 14 + (flake.id % 22)
 
         return (
           <div
             key={`${season}-flake-${flake.id}`}
-            className="side-flake"
+            className="side-flake side-flake-inner"
+            ref={(el) => {
+              flakeRefs.current[i] = el
+            }}
             style={{
               left:    `${flake.x}px`,
               top:     `${flake.y}px`,
               opacity: flake.opacity,
-              filter:  `drop-shadow(0 0 5px ${glow})`,
             }}
           >
-            <div
-              className="side-flake-inner"
+            <SeasonDecoSVG
+              season={season}
+              size={flake.size}
+              detail={flake.detail}
+              id={flake.id}
+              className="side-flake-spin"
               style={{
-                transform: `translate(-50%, -50%) rotate(${angle.toFixed(1)}deg)`,
+                animationDuration: `${spinSec}s`,
+                animationDirection: flake.id % 2 === 0 ? 'normal' : 'reverse',
               }}
-            >
-              <div
-                className="side-flake-spin"
-                style={{
-                  animationDuration: `${spinSec}s`,
-                  animationDirection: flake.id % 2 === 0 ? 'normal' : 'reverse',
-                }}
-              >
-                <SeasonDecoSVG season={season} size={flake.size} detail={flake.detail} id={flake.id} />
-              </div>
-            </div>
+            />
           </div>
         )
       })}
@@ -1209,6 +1231,10 @@ function App() {
   }
 
   const closeDemo = useCallback(() => setActiveDemo(null), [])
+  const openDemo = useCallback((post) => setActiveDemo(post), [])
+  const selectCategory = useCallback((category) => {
+    setActiveCategory(category)
+  }, [])
 
   const copyEmail = useCallback(async () => {
     const openMailto = () => {
@@ -1489,7 +1515,7 @@ function App() {
                 key={category}
                 type="button"
                 className={activeCategory === category ? 'filter-chip active' : 'filter-chip'}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => selectCategory(category)}
                 aria-pressed={activeCategory === category}
               >
                 {category}
@@ -1499,7 +1525,7 @@ function App() {
         </div>
         <div className="projects-grid">
           {filteredPosts.map((post) => (
-            <ProjectCard key={post.title} post={post} onOpenDemo={setActiveDemo} />
+            <ProjectCard key={post.title} post={post} onOpenDemo={openDemo} />
           ))}
         </div>
       </section>

@@ -282,23 +282,19 @@
   }
 }
 
-.side-flake {
-  position: absolute;
-  pointer-events: none;
-}
-
+.side-flake,
 .side-flake-inner {
   position: absolute;
-  left: 0;
-  top: 0;
-  transition: transform 200ms ease-out;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
   transform-origin: center center;
+  transition: transform 200ms ease-out;
 }
 
 .side-flake-spin {
+  display: block;
   animation: sideDecoSpin linear infinite;
   transform-origin: center center;
-  will-change: transform;
 }
 
 @keyframes sideDecoSpin {
@@ -520,6 +516,13 @@
     background 0.8s cubic-bezier(0.33, 1, 0.68, 1),
     border-color 0.55s ease,
     box-shadow 0.55s ease;
+}
+
+@media (max-width: 699px) {
+  .card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 .topbar {
