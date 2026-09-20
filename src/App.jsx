@@ -24,7 +24,7 @@ function cancelParticleRaf() {
 // ─── Season System ────────────────────────────────────────────────────────────
 const SEASON_CONFIG = {
   winter: {
-    label: 'Winter', icon: '❄️',
+    label: 'Winter',
     bodyBg: '#030d18',
     mtnColors: ['#1c4068', '#0e2a42', '#071c2e', '#030d18'],
     cardBg: 'rgba(8, 26, 46, 0.72)',
@@ -37,7 +37,7 @@ const SEASON_CONFIG = {
     textMuted: '#a8c4dc',
   },
   spring: {
-    label: 'Spring', icon: '🌸',
+    label: 'Spring',
     bodyBg: '#060f08',
     mtnColors: ['#1a4820', '#0e2e14', '#071a09', '#060f08'],
     cardBg: 'rgba(8, 26, 12, 0.72)',
@@ -50,7 +50,7 @@ const SEASON_CONFIG = {
     textMuted: '#a8c9b8',
   },
   summer: {
-    label: 'Summer', icon: '🌻',
+    label: 'Summer',
     // Dusk over water: cool teal mountains, warm air — reads clearly different from autumn earth tones
     bodyBg: '#030f14',
     mtnColors: ['#1a6b7a', '#0f4a58', '#082e38', '#030f14'],
@@ -64,7 +64,7 @@ const SEASON_CONFIG = {
     textMuted: '#c9b896',
   },
   autumn: {
-    label: 'Autumn', icon: '🍂',
+    label: 'Autumn',
     // Rust, bark, wet soil — no shared red-brown band with old “volcanic” summer
     bodyBg: '#0a0504',
     mtnColors: ['#4a2c22', '#2e1a14', '#1a0f0c', '#0a0504'],
@@ -77,6 +77,80 @@ const SEASON_CONFIG = {
     text: '#f3ebe4',
     textMuted: '#c4b0a0',
   },
+}
+
+const NAV_SECTION_IDS = ['experience', 'projects', 'approach', 'contact']
+
+function SeasonIcon({ season, size = 18 }) {
+  const label = SEASON_CONFIG[season]?.label ?? season
+  const props = {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.75,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    'aria-label': label,
+    role: 'img',
+  }
+
+  switch (season) {
+    case 'winter':
+      return (
+        <svg {...props}>
+          <path d="M12 2v20M2 12h20M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4" />
+          <path d="M12 6.5l1.6-1.6M12 6.5l-1.6-1.6M12 17.5l1.6 1.6M12 17.5l-1.6 1.6M6.5 12l-1.6 1.6M6.5 12l-1.6-1.6M17.5 12l1.6 1.6M17.5 12l1.6-1.6" />
+        </svg>
+      )
+    case 'spring':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="2.25" fill="currentColor" stroke="none" />
+          <ellipse cx="12" cy="6.2" rx="2.4" ry="3.6" />
+          <ellipse cx="12" cy="17.8" rx="2.4" ry="3.6" />
+          <ellipse cx="6.2" cy="12" rx="3.6" ry="2.4" />
+          <ellipse cx="17.8" cy="12" rx="3.6" ry="2.4" />
+        </svg>
+      )
+    case 'summer':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="3.5" />
+          <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.05 5.05l1.55 1.55M17.4 17.4l1.55 1.55M18.95 5.05l-1.55 1.55M6.6 17.4l-1.55 1.55" />
+        </svg>
+      )
+    case 'autumn':
+      return (
+        <svg {...props}>
+          <path d="M12 20c0-4.5 2.2-7.5 6.5-9.5C14 8.5 12 5.5 12 2c0 3.5-2 6.5-6.5 8.5C10 12.5 12 15.5 12 20Z" />
+          <path d="M12 12v8" />
+        </svg>
+      )
+    default:
+      return null
+  }
+}
+
+function ResetSeasonIcon({ size = 18 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-label="Reset to current season"
+      role="img"
+    >
+      <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6" />
+      <path d="M3.5 4.5v4.5H8" />
+    </svg>
+  )
 }
 const SEASON_ORDER = ['winter', 'spring', 'summer', 'autumn']
 
@@ -1110,6 +1184,51 @@ function App() {
     }
   }, [])
 
+  // Highlight nav link for the section currently in view
+  useEffect(() => {
+    const links = Array.from(document.querySelectorAll('.top-links a[href^="#"]'))
+    if (!links.length) return
+
+    const linkById = new Map(
+      links
+        .map((a) => [a.getAttribute('href')?.slice(1), a])
+        .filter(([id]) => id && NAV_SECTION_IDS.includes(id)),
+    )
+
+    const sections = NAV_SECTION_IDS
+      .map((id) => document.getElementById(id))
+      .filter(Boolean)
+
+    if (!sections.length) return
+
+    const visible = new Set()
+
+    const setActive = (id) => {
+      linkById.forEach((link, sectionId) => {
+        link.classList.toggle('is-active', sectionId === id)
+      })
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target.id)
+          else visible.delete(entry.target.id)
+        }
+        const active = NAV_SECTION_IDS.find((id) => visible.has(id))
+        if (active) setActive(active)
+      },
+      {
+        root: null,
+        rootMargin: '-80px 0px -55% 0px',
+        threshold: 0,
+      },
+    )
+
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [])
+
   const filteredPosts = useMemo(() => {
     if (activeCategory === 'All') {
       return projectPosts
@@ -1160,21 +1279,23 @@ function App() {
             {SEASON_ORDER.map((s) => (
               <button
                 key={s}
+                type="button"
                 className={`season-btn${season === s ? ' season-btn--active' : ''}${s === autoSeason() && !userPicked ? ' season-btn--auto' : ''}`}
                 onClick={() => pickSeason(s)}
                 title={`${SEASON_CONFIG[s].label}${s === autoSeason() ? ' (current season)' : ''}`}
                 aria-pressed={season === s}
               >
-                {SEASON_CONFIG[s].icon}
+                <SeasonIcon season={s} size={18} />
               </button>
             ))}
             {userPicked && (
               <button
+                type="button"
                 className="season-btn season-btn-reset"
                 onClick={resetToAuto}
                 title="Reset to current real season"
               >
-                🔄
+                <ResetSeasonIcon size={18} />
               </button>
             )}
           </div>
