@@ -34,10 +34,21 @@
   --neutral-800: #081a2e;
   --neutral-900: #030d18;
 
-  /* Accent placeholders (season palette wired later) */
-  --accent: #9ae3ff;
-  --accent-muted: rgba(154, 227, 255, 0.22);
-  --accent-strong: #a6deff;
+  /* Surfaces & text (overridden per season) */
+  --bg: #030d18;
+  --surface: rgba(8, 26, 46, 0.72);
+  --surface-2: rgba(255, 255, 255, 0.045);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #eef7ff;
+  --text-muted: #a8c4dc;
+  --text-dim: #89a6bf;
+
+  /* Accent (overridden per season) */
+  --accent: #8fd8ff;
+  --accent-soft: #eef7ff;
+  --accent-text: #8fd8ff;
+  --accent-muted: rgba(143, 216, 255, 0.22);
+  --accent-strong: #eef7ff;
 
   font-family: var(--font-sans);
   --card-season-bg: rgba(8, 26, 46, 0.72);
@@ -53,18 +64,27 @@
 
 body {
   margin: 0;
-  color: #eef7ff;
-  background: #030d18;
+  color: var(--text);
+  background: var(--bg);
   min-height: 100vh;
   animation: bodyFade 440ms ease-out;
-  transition: background-color 0.85s cubic-bezier(0.33, 1, 0.68, 1);
+  transition: background-color 0.85s cubic-bezier(0.33, 1, 0.68, 1), color 0.55s ease;
 }
 
-/* Stacking (peaks → particles → page) lives inside #root — see .peaks-layer / .season-visual-mount in App.css */
+/* Vignette: between season decor (z-1) and .page (z-3) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, var(--bg) 100%);
+}
+
+/* Stacking (peaks → particles → vignette → page) — no isolation so body::before can interleave */
 #root {
   min-height: 100vh;
   position: relative;
-  isolation: isolate;
 }
 
 @keyframes bodyFade {

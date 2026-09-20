@@ -31,6 +31,10 @@ const SEASON_CONFIG = {
     sideGlow: 'rgba(200,235,255,0.45)',
     glowInner: 'rgba(160, 215, 255, 0.28)',
     glowOuter: 'rgba(200, 235, 255, 0.14)',
+    accent: '#8fd8ff',
+    accentSoft: '#eef7ff',
+    text: '#eef7ff',
+    textMuted: '#a8c4dc',
   },
   spring: {
     label: 'Spring', icon: '🌸',
@@ -40,6 +44,10 @@ const SEASON_CONFIG = {
     sideGlow: 'rgba(180,240,160,0.4)',
     glowInner: 'rgba(120, 210, 140, 0.22)',
     glowOuter: 'rgba(170, 235, 160, 0.12)',
+    accent: '#8fe3b0',
+    accentSoft: '#e8f8ef',
+    text: '#eef8f0',
+    textMuted: '#a8c9b8',
   },
   summer: {
     label: 'Summer', icon: '🌻',
@@ -50,6 +58,10 @@ const SEASON_CONFIG = {
     sideGlow: 'rgba(255, 214, 130, 0.38)',
     glowInner: 'rgba(90, 200, 210, 0.22)',
     glowOuter: 'rgba(255, 210, 130, 0.16)',
+    accent: '#f5c66b',
+    accentSoft: '#faf0d8',
+    text: '#fff8ec',
+    textMuted: '#c9b896',
   },
   autumn: {
     label: 'Autumn', icon: '🍂',
@@ -60,6 +72,10 @@ const SEASON_CONFIG = {
     sideGlow: 'rgba(200, 95, 45, 0.36)',
     glowInner: 'rgba(210, 110, 60, 0.2)',
     glowOuter: 'rgba(160, 70, 45, 0.12)',
+    accent: '#f0a35c',
+    accentSoft: '#f3ebe4',
+    text: '#f3ebe4',
+    textMuted: '#c4b0a0',
   },
 }
 const SEASON_ORDER = ['winter', 'spring', 'summer', 'autumn']
@@ -1058,14 +1074,24 @@ function App() {
 
   const closeDemo = useCallback(() => setActiveDemo(null), [])
 
-  // Apply season-specific body bg + card tint + ambient glows (CSS transitions handle smoothing)
+  // Apply season palette → CSS vars (accent/text + card/glow); transitions smooth changes
   useEffect(() => {
     const cfg = SEASON_CONFIG[season]
     document.body.style.backgroundColor = cfg.bodyBg
     const root = document.documentElement
+    root.style.setProperty('--bg', cfg.bodyBg)
     root.style.setProperty('--card-season-bg', cfg.cardBg)
+    root.style.setProperty('--surface', cfg.cardBg)
     root.style.setProperty('--season-glow-inner', cfg.glowInner)
     root.style.setProperty('--season-glow-outer', cfg.glowOuter)
+    root.style.setProperty('--accent', cfg.accent)
+    root.style.setProperty('--accent-soft', cfg.accentSoft)
+    root.style.setProperty('--accent-text', cfg.accent)
+    root.style.setProperty('--accent-muted', `${cfg.accent}38`)
+    root.style.setProperty('--accent-strong', cfg.accentSoft)
+    root.style.setProperty('--text', cfg.text)
+    root.style.setProperty('--text-muted', cfg.textMuted)
+    document.body.style.color = cfg.text
   }, [season])
 
   useEffect(() => {

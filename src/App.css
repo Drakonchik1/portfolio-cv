@@ -20,24 +20,24 @@
 
 .btn--primary {
   background: var(--accent-muted);
-  border-color: rgba(154, 227, 255, 0.45);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   color: var(--neutral-50);
 }
 
 .btn--primary:hover {
-  background: rgba(154, 227, 255, 0.32);
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
   border-color: var(--accent);
 }
 
 .btn--ghost {
-  border-color: rgba(200, 231, 255, 0.26);
-  background: rgba(206, 234, 255, 0.08);
-  color: var(--neutral-100);
+  border-color: var(--border);
+  background: var(--surface-2);
+  color: var(--text);
 }
 
 .btn--ghost:hover {
-  background: rgba(167, 227, 255, 0.22);
-  border-color: rgba(167, 227, 255, 0.55);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .btn--icon {
@@ -55,7 +55,7 @@
 .tag {
   display: inline-block;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(192, 230, 255, 0.36);
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, transparent);
   color: var(--accent);
   font-size: 0.74rem;
   padding: 0.15rem 0.5rem;
@@ -64,9 +64,9 @@
 .chip {
   display: inline-block;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(201, 230, 255, 0.33);
-  background: rgba(210, 235, 255, 0.08);
-  color: var(--neutral-50);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
   font-size: 0.86rem;
   padding: 0.35rem 0.74rem;
   text-decoration: none;
@@ -88,13 +88,13 @@
   z-index: 0;
 }
 
-/* Portal target: fixed overlay between peaks and main content */
+/* Portal target: fixed overlay between peaks and vignette (body::before z-2) */
 #season-visual-portal.season-visual-mount,
 .season-visual-mount {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 1;
 }
 
 /* Full-width mountain bands that scroll with the page */
@@ -131,8 +131,8 @@
   z-index: 100;
   padding: 0.5rem 0.85rem;
   border-radius: 8px;
-  background: #0b2a42;
-  color: #e8f6ff;
+  background: var(--neutral-700);
+  color: var(--text);
   text-decoration: none;
   font-size: 0.9rem;
 }
@@ -204,7 +204,7 @@
 }
 
 
-/* Fills .season-visual-mount (fixed z-2 between peaks and .page) */
+/* Fills .season-visual-mount (fixed z-1; vignette at z-2, .page at z-3) */
 .season-visual-root {
   position: fixed;
   inset: 0;
@@ -312,7 +312,7 @@
 .ambient-rotor-ring {
   flex-shrink: 0;
   border-radius: 50%;
-  border: 1px solid rgba(200, 228, 255, 0.11);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
   box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.04);
   animation: ambientRotorSpin linear infinite;
   opacity: 0.55;
@@ -339,7 +339,7 @@
   position: absolute;
   pointer-events: none;
   border-radius: 50%;
-  border: 1px solid rgba(200, 230, 255, 0.16);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
   animation: cardRotorSpin linear infinite;
   opacity: 0.35;
   z-index: 0;
@@ -407,7 +407,7 @@
   align-items: center;
   gap: 0.5rem;
   margin: 0;
-  color: #f1f8ff;
+  color: var(--text);
   font-size: 1rem;
   letter-spacing: 0.04em;
   font-weight: 700;
@@ -419,7 +419,7 @@
   height: 22px;
   flex-shrink: 0;
   border-radius: 50%;
-  border: 1px dashed rgba(200, 230, 255, 0.35);
+  border: 1px dashed color-mix(in srgb, var(--accent) 40%, transparent);
   animation: brandRotorSpin 14s linear infinite;
   opacity: 0.75;
 }
@@ -483,8 +483,8 @@
 .card {
   position: relative;
   z-index: 1;
-  background: var(--card-season-bg, rgba(8, 26, 46, 0.72));
-  border: 1px solid rgba(200, 231, 255, 0.18);
+  background: var(--card-season-bg, var(--surface));
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 1.15rem;
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -507,7 +507,7 @@
 }
 
 .top-links a {
-  color: #deefff;
+  color: var(--text);
   text-decoration: none;
   font-size: 0.9rem;
   padding: 0.42rem 0.72rem;
@@ -515,7 +515,7 @@
 }
 
 .top-links a:hover {
-  background: rgba(214, 239, 255, 0.15);
+  background: var(--surface-2);
 }
 
 .hero {
@@ -528,7 +528,7 @@
   margin: 0.3rem 0;
   font-size: clamp(2rem, 5vw, 3.2rem);
   line-height: 1.03;
-  color: #f4fbff;
+  color: var(--text);
 }
 
 .eyebrow {
@@ -536,17 +536,17 @@
   font-size: 0.74rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: #a6deff;
+  color: var(--accent);
 }
 
 .role {
   margin: 0;
-  color: #e8f3ff;
+  color: var(--text);
   font-weight: 600;
 }
 
 .summary {
-  color: #d0e5f8;
+  color: var(--text-muted);
   line-height: 1.63;
 }
 
@@ -560,36 +560,36 @@
 .chips span,
 .chips a {
   border-radius: 999px;
-  border: 1px solid rgba(201, 230, 255, 0.33);
-  background: rgba(210, 235, 255, 0.08);
-  color: #f2f9ff;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
   font-size: 0.86rem;
   padding: 0.35rem 0.74rem;
   text-decoration: none;
 }
 
 .chips a:hover {
-  background: rgba(170, 224, 255, 0.22);
-  border-color: rgba(170, 224, 255, 0.6);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .contact-secondary {
   margin-top: 0.9rem;
   font-size: 0.84rem;
-  color: rgba(200, 225, 248, 0.72);
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
 .contact-secondary a {
-  color: rgba(220, 240, 255, 0.88);
+  color: var(--accent-text);
   text-decoration: none;
-  border-bottom: 1px solid rgba(160, 210, 255, 0.25);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .contact-secondary a:hover {
-  color: #f2f9ff;
-  border-bottom-color: rgba(170, 224, 255, 0.55);
+  color: var(--text);
+  border-bottom-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .contact-dot {
@@ -599,10 +599,9 @@
 }
 
 .hero-side {
-  border: 1px solid rgba(196, 229, 255, 0.24);
   border-radius: 14px;
   padding: 0.8rem;
-  background: rgba(210, 236, 255, 0.06);
+  background: var(--surface-2);
 }
 
 .stats-grid {
@@ -614,14 +613,13 @@
 
 .stats-grid article {
   border-radius: 10px;
-  border: 1px solid rgba(197, 229, 255, 0.27);
-  background: rgba(210, 235, 255, 0.08);
+  background: var(--surface-2);
   padding: 0.55rem;
 }
 
 .kpi-value {
   margin: 0;
-  color: #f2faff;
+  color: var(--text);
   font-size: 1.22rem;
   font-weight: 700;
 }
@@ -630,25 +628,25 @@
   margin: 0.2rem 0 0;
   font-size: 0.72rem;
   line-height: 1.35;
-  color: #a8cce8;
+  color: var(--text-muted);
 }
 
 .proof-line {
   margin: 0.35rem 0 0;
   font-size: 0.8rem;
-  color: #8fd4a8;
+  color: var(--accent);
   font-weight: 600;
 }
 
 a:focus-visible,
 button:focus-visible {
-  outline: 2px solid rgba(140, 210, 255, 0.85);
+  outline: 2px solid color-mix(in srgb, var(--accent) 85%, transparent);
   outline-offset: 2px;
 }
 
 .availability {
   margin: 0.7rem 0 0;
-  color: #b6efff;
+  color: var(--accent-text);
   font-size: 0.88rem;
 }
 
@@ -663,13 +661,13 @@ button:focus-visible {
 .cta h2,
 .approach h2 {
   margin: 0 0 0.65rem;
-  color: #f4fbff;
+  color: var(--text);
 }
 
 .approach-lead {
   margin: 0 0 1rem;
   max-width: 52rem;
-  color: #c5dff2;
+  color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.55;
 }
@@ -684,15 +682,14 @@ button:focus-visible {
   margin: 0;
   padding: 0.85rem 0.9rem;
   border-radius: 12px;
-  border: 1px solid rgba(188, 224, 255, 0.2);
-  background: rgba(214, 237, 255, 0.045);
+  background: var(--surface-2);
 }
 
 .approach-item h3 {
   margin: 0 0 0.4rem;
   font-size: 0.92rem;
   font-weight: 700;
-  color: #e2f3ff;
+  color: var(--text);
   letter-spacing: 0.02em;
 }
 
@@ -700,7 +697,7 @@ button:focus-visible {
   margin: 0;
   font-size: 0.84rem;
   line-height: 1.52;
-  color: #b8d4ec;
+  color: var(--text-muted);
 }
 
 .feed-list {
@@ -709,10 +706,9 @@ button:focus-visible {
 }
 
 .feed-item {
-  border: 1px solid rgba(199, 230, 255, 0.22);
   border-radius: 14px;
   padding: 0.85rem;
-  background: rgba(214, 237, 255, 0.05);
+  background: var(--surface-2);
 }
 
 .post-tags {
@@ -725,8 +721,8 @@ button:focus-visible {
 .post-tag {
   display: inline-block;
   border-radius: 999px;
-  border: 1px solid rgba(192, 230, 255, 0.36);
-  color: #9ae3ff;
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, transparent);
+  color: var(--accent);
   font-size: 0.74rem;
   padding: 0.15rem 0.5rem;
 }
@@ -742,10 +738,9 @@ button:focus-visible {
 }
 
 .experience-item {
-  border: 1px solid rgba(199, 230, 255, 0.18);
   border-radius: 14px;
   padding: 0.85rem 1rem;
-  background: rgba(214, 237, 255, 0.04);
+  background: var(--surface-2);
 }
 
 .experience-head {
@@ -758,18 +753,18 @@ button:focus-visible {
 
 .experience-item h3 {
   margin: 0;
-  color: #f3fbff;
+  color: var(--text);
   font-size: 1.02rem;
 }
 
 .experience-org {
   margin: 0.25rem 0 0;
-  color: #b7d5ed;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
 .experience-date {
-  color: #9ae3ff;
+  color: var(--accent);
   font-size: 0.82rem;
   white-space: nowrap;
 }
@@ -777,7 +772,7 @@ button:focus-visible {
 .experience-bullets {
   margin: 0.55rem 0 0;
   padding-left: 1.15rem;
-  color: #d4e8f9;
+  color: var(--text-muted);
 }
 
 .experience-bullets li {
@@ -786,7 +781,7 @@ button:focus-visible {
 
 .education-focus {
   margin: 0.45rem 0 0;
-  color: #d4e8f9;
+  color: var(--text-muted);
   font-size: 0.88rem;
   line-height: 1.45;
 }
@@ -804,19 +799,19 @@ button:focus-visible {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #9ae3ff;
+  color: var(--accent);
   opacity: 0.85;
 }
 
 .education-school {
   margin: 0;
-  color: #f3fbff;
+  color: var(--text);
   font-weight: 600;
 }
 
 .education-meta {
   margin: 0.35rem 0 0;
-  color: #b7d5ed;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -824,7 +819,7 @@ button:focus-visible {
 .language-list {
   margin: 0.55rem 0 0;
   padding-left: 1.1rem;
-  color: #d4e8f9;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -839,7 +834,7 @@ button:focus-visible {
 .looking-list {
   margin: 0.55rem 0 0;
   padding-left: 1.1rem;
-  color: #d4e8f9;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -849,7 +844,7 @@ button:focus-visible {
 }
 
 .building-title a {
-  color: #9de5ff;
+  color: var(--accent-text);
   text-decoration: none;
 }
 
@@ -864,24 +859,24 @@ button:focus-visible {
 
 .feed-item h3 {
   margin: 0;
-  color: #f3fbff;
+  color: var(--text);
   font-size: 1.04rem;
 }
 
 .feed-item p {
   margin: 0.45rem 0 0;
-  color: #d4e8f9;
+  color: var(--text-muted);
 }
 
 .meta-line {
   font-size: 0.88rem;
-  color: #b7d5ed;
+  color: var(--text-muted);
 }
 
 .read-more {
   display: inline-block;
   margin-top: 0.55rem;
-  color: #9de5ff;
+  color: var(--accent-text);
   text-decoration: none;
   font-size: 0.9rem;
 }
@@ -891,7 +886,7 @@ button:focus-visible {
 }
 
 .read-more.disabled {
-  color: #89a6bf;
+  color: var(--text-dim);
 }
 
 .sidebar {
@@ -912,10 +907,10 @@ button:focus-visible {
 }
 
 .category-btn {
-  border: 1px solid rgba(200, 231, 255, 0.26);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(206, 234, 255, 0.08);
-  color: #e7f6ff;
+  background: var(--surface-2);
+  color: var(--text);
   font-size: 0.82rem;
   padding: 0.34rem 0.72rem;
   cursor: pointer;
@@ -923,8 +918,8 @@ button:focus-visible {
 
 .category-btn.active,
 .category-btn:hover {
-  background: rgba(167, 227, 255, 0.25);
-  border-color: rgba(167, 227, 255, 0.6);
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .popular-list {
@@ -932,7 +927,7 @@ button:focus-visible {
   padding-left: 1.2rem;
   display: grid;
   gap: 0.35rem;
-  color: #d2e7f8;
+  color: var(--text-muted);
 }
 
 .stack-cloud {
@@ -943,9 +938,9 @@ button:focus-visible {
 
 .stack-cloud span {
   border-radius: 8px;
-  border: 1px solid rgba(201, 231, 255, 0.24);
-  background: rgba(208, 235, 255, 0.08);
-  color: #e8f5ff;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
   font-size: 0.83rem;
   padding: 0.34rem 0.52rem;
 }
@@ -956,7 +951,7 @@ button:focus-visible {
 
 .footer {
   text-align: center;
-  color: #9fc0dc;
+  color: var(--text-muted);
   font-size: 0.88rem;
   padding-bottom: 0.5rem;
 }
@@ -1007,8 +1002,8 @@ button:focus-visible {
 
 .demo-btn {
   background: none;
-  border: 1px solid rgba(160,210,255,0.3);
-  color: rgba(160,210,255,0.85);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent-text);
   cursor: pointer;
   font-family: inherit;
   font-size: inherit;
@@ -1017,8 +1012,8 @@ button:focus-visible {
 }
 
 .demo-btn:hover {
-  color: #fff;
-  border-color: rgba(160,210,255,0.7);
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
 }
 
 /* ── Modal overlay + card ───────────────────────────────────────────────────── */
@@ -1054,7 +1049,7 @@ button:focus-visible {
   top: 1rem; right: 1rem;
   background: none;
   border: 1px solid rgba(255,255,255,0.18);
-  color: #eef7ff;
+  color: var(--text);
   font-size: 1.4rem;
   line-height: 1;
   width: 2rem; height: 2rem;
@@ -1130,7 +1125,7 @@ button:focus-visible {
   margin: 0;
   font-size: 0.92rem;
   font-weight: 600;
-  color: #eef7ff;
+  color: var(--text);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1143,8 +1138,8 @@ button:focus-visible {
   width: 1.35rem;
   height: 1.35rem;
   border-radius: 50%;
-  background: rgba(120, 200, 255, 0.2);
-  border: 1px solid rgba(160, 220, 255, 0.35);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
   font-size: 0.72rem;
   flex-shrink: 0;
 }
@@ -1177,7 +1172,7 @@ button:focus-visible {
 }
 
 .demo-code--run {
-  color: #b8e8ff;
+  color: var(--accent-text);
 }
 
 .modal-github {
@@ -1185,15 +1180,15 @@ button:focus-visible {
   margin-top: 1.25rem;
   padding: 0.5rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid rgba(160, 220, 255, 0.35);
-  color: #9de5ff;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent-text);
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 600;
 }
 
 .modal-github:hover {
-  background: rgba(120, 200, 255, 0.15);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 /* Code block */
