@@ -1396,26 +1396,50 @@ function App() {
 
       <section className="card experience section-with-rotors" id="experience">
         <span className="card-rotor card-rotor--tl" aria-hidden="true" />
-        <h2>Experience</h2>
-        <div className="experience-list">
-          {experiencePosts.map((job) => (
-            <article key={job.company + job.role} className="experience-item">
-              <div className="experience-head">
-                <div>
+        <div className="experience-columns">
+          <div className="experience-col">
+            <h2>Experience</h2>
+            <ul className="timeline">
+              {experiencePosts.map((job) => (
+                <li key={job.company + job.role}>
+                  <p className="timeline-date">{job.period}</p>
                   <h3>{job.role}</h3>
-                  <p className="experience-org">
+                  <p className="timeline-org">
                     {job.company} · {job.location}
                   </p>
-                </div>
-                <span className="experience-date">{job.period}</span>
-              </div>
-              <ul className="experience-bullets">
-                {job.bullets.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
+                  <ul className="experience-bullets">
+                    {job.bullets.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="experience-col">
+            <h2>Education</h2>
+            <ul className="timeline">
+              {education.map((edu) => (
+                <li key={edu.school}>
+                  <p className="timeline-date">{edu.period}</p>
+                  <h3>{edu.program}</h3>
+                  <p className="timeline-org">
+                    {edu.school} · {edu.location}
+                  </p>
+                  <p className="education-focus">{edu.focus}</p>
+                  {edu.certificates.length > 0 && (
+                    <div className="timeline-tags">
+                      {edu.certificates.map((cert) => (
+                        <span key={cert} className="tag">
+                          {cert.includes('—') ? cert.split('—')[0].trim() : cert}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -1475,25 +1499,6 @@ function App() {
             <li key={item}>{item}</li>
           ))}
         </ul>
-      </section>
-
-      <section className="card">
-        <h2>Education</h2>
-        {education.map((edu) => (
-          <div key={edu.school} className="education-entry">
-            <p className="education-school">{edu.school}</p>
-            <p className="education-meta">{edu.program}</p>
-            <p className="education-meta">{edu.period} · {edu.location}</p>
-            <p className="education-focus">{edu.focus}</p>
-            {edu.certificates.length > 0 && (
-              <ul className="education-certs">
-                {edu.certificates.map((cert) => (
-                  <li key={cert}>{cert}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        ))}
       </section>
 
       <section className="card">
