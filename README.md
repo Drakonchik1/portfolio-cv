@@ -22,11 +22,22 @@ npm run build
 - `src/App.jsx` — layout, seasons, particles, projects
 - `src/App.css` — styling and animations
 - `src/ProjectModal.jsx` — demo modal (lazy-loaded chunk)
+- `index.html` — SEO meta, favicon, Open Graph, JSON-LD Person
+- `public/favicon.svg` — P monogram favicon
+- `public/og.png` — 1200×630 social preview (name, role, stack, URL)
+- `public/Pavlo_Dorofieiev_CV.pdf` — CV download (**add manually**; Download CV button 404s until present)
 - `CV_Pavlo_Dorofieiev_ENG.md` — CV text source
 
 ---
 
 ## Recent updates (changelog)
+
+### 2026-09-20 — SEO / assets (Phase 10)
+- Favicon (`public/favicon.svg`) + `og.png` (1200×630) linked via `og:image` / `twitter:image`
+- Meta description updated: FlowBoard **277** tests, PatchGuard **336** tests
+- `theme-color` set to winter body bg `#030d18`
+- JSON-LD `Person` (name, jobTitle, url, email, sameAs GitHub + LinkedIn)
+- Note: place CV PDF at `public/Pavlo_Dorofieiev_CV.pdf` manually before Download CV works
 
 ### 2026-07-16 — FlowBoard MVP + PatchGuard sync
 - FlowBoard: **277** unit tests, **21** integration tests; status **MVP complete** (Sprints 1–8)
