@@ -1,5 +1,6 @@
 import {
   lazy,
+  memo,
   Suspense,
   useCallback,
   useEffect,
@@ -186,16 +187,6 @@ const heroKpis = [
   { value: 'C1', label: 'EN/PL' },
 ]
 
-const currentlyBuilding = {
-  title: 'FlowBoard',
-  link: 'https://github.com/Drakonchik1/FlowBoard',
-  lines: [
-    'MVP complete (Sprints 1–8) · Hangfire jobs · card activity log',
-    'Kanban + SignalR · Redis backplane · prod Docker / Railway / Azure docs',
-    '277 unit tests · 21 integration tests (TestContainers)',
-  ],
-}
-
 const lookingFor = [
   'Junior .NET backend (ASP.NET Core)',
   'Hybrid — Katowice area',
@@ -300,6 +291,7 @@ const projectPosts = [
     stack: '.NET 10 · ASP.NET Core · EF Core · SQL Server · SignalR · Redis · Hangfire · Docker',
     category: 'Backend',
     status: 'MVP complete',
+    flagship: true,
     proof: 'GitHub · 277 unit · 21 integration · CI',
     link: 'https://github.com/Drakonchik1/FlowBoard',
     demo: {
@@ -1122,6 +1114,61 @@ function SeasonVisualLayer({ season, viewport }) {
   )
 }
 
+function truncateTitle(title) {
+  const idx = title.indexOf(':')
+  return idx === -1 ? title : title.slice(0, idx).trim()
+}
+
+const ProjectCard = memo(function ProjectCard({ post, onOpenDemo }) {
+  const stackTags = post.stack.split(' · ').filter(Boolean)
+
+  return (
+    <article
+      className={`project-card${post.flagship ? ' project-card--flagship' : ''}`}
+    >
+      <div className="project-card-accent" aria-hidden="true" />
+      <div className="project-card-body">
+        <div className="post-tags">
+          <span className="post-tag">{post.category}</span>
+          {post.flagship ? (
+            <span className="post-tag post-tag--flagship">Flagship · MVP complete</span>
+          ) : (
+            post.status && <span className="post-tag post-tag--status">{post.status}</span>
+          )}
+        </div>
+        <h3>{truncateTitle(post.title)}</h3>
+        <p className="project-excerpt">{post.excerpt}</p>
+        <div className="stack-cloud project-stack">
+          {stackTags.map((tag) => (
+            <span key={tag}>{tag}</span>
+          ))}
+        </div>
+        <div className="project-card-footer">
+          {post.link !== '#' && (
+            <a
+              className="btn btn--ghost"
+              href={post.link}
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub↗
+            </a>
+          )}
+          {post.demo && (
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => onOpenDemo(post)}
+            >
+              How it works
+            </button>
+          )}
+        </div>
+      </div>
+    </article>
+  )
+})
+
 function App() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [activeDemo, setActiveDemo] = useState(null)
@@ -1372,131 +1419,90 @@ function App() {
         </div>
       </section>
 
-      <section className="content-layout">
-        <section className="card feed section-with-rotors" id="projects">
-          <span className="card-rotor card-rotor--bl" aria-hidden="true" />
+      <section className="card projects section-with-rotors" id="projects">
+        <span className="card-rotor card-rotor--bl" aria-hidden="true" />
+        <div className="section-head projects-head">
           <h2>Projects</h2>
-          <div className="feed-list">
-            {filteredPosts.map((post) => (
-              <article key={post.title} className="feed-item">
-                <div className="post-tags">
-                  <span className="post-tag">{post.category}</span>
-                  {post.status && <span className="post-tag post-tag--status">{post.status}</span>}
-                </div>
-                <h3>{post.title}</h3>
-                <p>{post.excerpt}</p>
-                <p className="meta-line">{post.stack}</p>
-                {post.proof && <p className="proof-line">{post.proof}</p>}
-                <div className="feed-actions">
-                  {post.link !== '#' && (
-                    <a className="read-more" href={post.link} target="_blank" rel="noreferrer">
-                      Open project
-                    </a>
-                  )}
-                  {post.demo && (
-                    <button className="read-more demo-btn" onClick={() => setActiveDemo(post)}>
-                      How it works
-                    </button>
-                  )}
-                </div>
-              </article>
+          <div className="filter-chips" role="group" aria-label="Filter projects by category">
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                className={activeCategory === category ? 'filter-chip active' : 'filter-chip'}
+                onClick={() => setActiveCategory(category)}
+                aria-pressed={activeCategory === category}
+              >
+                {category}
+              </button>
             ))}
           </div>
-        </section>
+        </div>
+        <div className="projects-grid">
+          {filteredPosts.map((post) => (
+            <ProjectCard key={post.title} post={post} onOpenDemo={setActiveDemo} />
+          ))}
+        </div>
+      </section>
 
-        <aside className="sidebar">
-          <section className="card sticky section-with-rotors" id="categories">
-            <span className="card-rotor card-rotor--tr-small" aria-hidden="true" />
-            <h2>Categories</h2>
-            <div className="category-grid">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  className={activeCategory === category ? 'category-btn active' : 'category-btn'}
-                  onClick={() => setActiveCategory(category)}
-                >
-                  {category}
-                </button>
+      <section className="card section-with-rotors">
+        <span className="card-rotor card-rotor--br-small" aria-hidden="true" />
+        <h2>Skills</h2>
+        {skillGroups.map((group) => (
+          <div key={group.label} className="skill-group">
+            <p className="skill-group-label">{group.label}</p>
+            <div className="stack-cloud">
+              {group.items.map((item) => (
+                <span key={item}>{item}</span>
               ))}
             </div>
-          </section>
+          </div>
+        ))}
+      </section>
 
-          <section className="card building-card">
-            <h2>Building now</h2>
-            <p className="building-title">
-              <a href={currentlyBuilding.link} target="_blank" rel="noreferrer">
-                {currentlyBuilding.title}
-              </a>
-            </p>
-            <ul className="building-list">
-              {currentlyBuilding.lines.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-          </section>
+      <section className="card">
+        <h2>Soft skills</h2>
+        <ul className="looking-list">
+          {softSkills.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
 
-          <section className="card section-with-rotors">
-            <span className="card-rotor card-rotor--br-small" aria-hidden="true" />
-            <h2>Skills</h2>
-            {skillGroups.map((group) => (
-              <div key={group.label} className="skill-group">
-                <p className="skill-group-label">{group.label}</p>
-                <div className="stack-cloud">
-                  {group.items.map((item) => (
-                    <span key={item}>{item}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </section>
+      <section className="card">
+        <h2>Open to</h2>
+        <ul className="looking-list">
+          {lookingFor.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
 
-          <section className="card">
-            <h2>Soft skills</h2>
-            <ul className="looking-list">
-              {softSkills.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
+      <section className="card">
+        <h2>Education</h2>
+        {education.map((edu) => (
+          <div key={edu.school} className="education-entry">
+            <p className="education-school">{edu.school}</p>
+            <p className="education-meta">{edu.program}</p>
+            <p className="education-meta">{edu.period} · {edu.location}</p>
+            <p className="education-focus">{edu.focus}</p>
+            {edu.certificates.length > 0 && (
+              <ul className="education-certs">
+                {edu.certificates.map((cert) => (
+                  <li key={cert}>{cert}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </section>
 
-          <section className="card">
-            <h2>Open to</h2>
-            <ul className="looking-list">
-              {lookingFor.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="card">
-            <h2>Education</h2>
-            {education.map((edu) => (
-              <div key={edu.school} className="education-entry">
-                <p className="education-school">{edu.school}</p>
-                <p className="education-meta">{edu.program}</p>
-                <p className="education-meta">{edu.period} · {edu.location}</p>
-                <p className="education-focus">{edu.focus}</p>
-                {edu.certificates.length > 0 && (
-                  <ul className="education-certs">
-                    {edu.certificates.map((cert) => (
-                      <li key={cert}>{cert}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </section>
-
-          <section className="card">
-            <h2>Languages</h2>
-            <ul className="language-list">
-              {languages.map((lang) => (
-                <li key={lang}>{lang}</li>
-              ))}
-            </ul>
-          </section>
-        </aside>
+      <section className="card">
+        <h2>Languages</h2>
+        <ul className="language-list">
+          {languages.map((lang) => (
+            <li key={lang}>{lang}</li>
+          ))}
+        </ul>
       </section>
 
       <section className="card approach section-with-rotors" id="approach">
