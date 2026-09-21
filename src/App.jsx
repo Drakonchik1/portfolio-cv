@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react'
 import './App.css'
+import SeasonScenery from './SeasonScenery.jsx'
 
 const ProjectModal = lazy(() => import('./ProjectModal.jsx'))
 
@@ -40,7 +41,7 @@ const SEASON_CONFIG = {
   spring: {
     label: 'Spring',
     bodyBg: '#060f08',
-    mtnColors: ['#1a4820', '#0e2e14', '#071a09', '#060f08'],
+    mtnColors: ['#3d8a4a', '#1f5c2c', '#0d2c16', '#060f08'],
     cardBg: 'rgba(8, 26, 12, 0.72)',
     sideGlow: 'rgba(180,240,160,0.4)',
     glowInner: 'rgba(120, 210, 140, 0.22)',
@@ -68,7 +69,7 @@ const SEASON_CONFIG = {
     label: 'Autumn',
     // Rust, bark, wet soil — no shared red-brown band with old “volcanic” summer
     bodyBg: '#0a0504',
-    mtnColors: ['#4a2c22', '#2e1a14', '#1a0f0c', '#0a0504'],
+    mtnColors: ['#8a4a2c', '#5a2e1c', '#2a140e', '#0a0504'],
     cardBg: 'rgba(32, 18, 12, 0.76)',
     sideGlow: 'rgba(200, 95, 45, 0.36)',
     glowInner: 'rgba(210, 110, 60, 0.2)',
@@ -194,8 +195,9 @@ const lookingFor = [
 ]
 
 const skillGroups = [
-  { label: 'Languages & runtime', items: ['C#', '.NET 8/10', 'SQL'] },
+  { id: 'lang', label: 'Languages & runtime', items: ['C#', '.NET 8/10', 'SQL'] },
   {
+    id: 'backend',
     label: 'Backend',
     items: [
       'ASP.NET Core',
@@ -212,10 +214,10 @@ const skillGroups = [
       'MediatR',
     ],
   },
-  { label: 'Desktop & mobile', items: ['WPF', 'MVVM', '.NET MAUI'] },
-  { label: 'Frontend', items: ['HTML', 'CSS', 'JavaScript', 'React'] },
-  { label: 'Tools', items: ['Git', 'Visual Studio', 'VS Code', 'Docker', 'xUnit'] },
-  { label: 'Familiar', items: ['Angular', 'Vue.js', 'PHP', 'Microservices', 'Event-Driven Architecture'] },
+  { id: 'desktop', label: 'Desktop & mobile', items: ['WPF', 'MVVM', '.NET MAUI'] },
+  { id: 'frontend', label: 'Frontend', items: ['HTML', 'CSS', 'JavaScript', 'React'] },
+  { id: 'tools', label: 'Tools', items: ['Git', 'Visual Studio', 'VS Code', 'Docker', 'xUnit'] },
+  { id: 'familiar', label: 'Familiar', items: ['Angular', 'Vue.js', 'PHP', 'Microservices', 'Event-Driven Architecture'] },
 ]
 
 const softSkills = [
@@ -1131,7 +1133,7 @@ function SideDecorations({ viewport, season }) {
 }
 
 /**
- * Fixed layer between mountain art (z-0) and .page (z-3). No createPortal — avoids mount races.
+ * Fixed layer between scenery (z-0) and .page (z-3). No createPortal — avoids mount races.
  * ParticleField stays mounted; decor remounts per season.
  */
 function SeasonVisualLayer({ season, viewport }) {
@@ -1349,18 +1351,14 @@ function App() {
 
   return (
     <>
-      {/* Peaks = back-most art; particles portal mounts above this, .page above both */}
-      <div className="peaks-layer peaks-layer--top" aria-hidden="true">
-        <div className="mtn-band mtn-band-top">
-          {(() => { const [c0, c1, c2] = SEASON_CONFIG[season].mtnColors; return (
-            <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 110 L160 28 L300 95 L480 18 L640 88 L800 32 L960 100 L1120 22 L1280 85 L1440 45 L1440 380 L0 380 Z" fill={c0}/>
-              <path d="M0 165 L140 78 L280 155 L450 55 L620 148 L790 70 L960 140 L1130 60 L1300 150 L1440 95 L1440 380 L0 380 Z" fill={c1}/>
-              <path d="M0 220 L180 140 L360 210 L540 125 L720 200 L900 135 L1080 205 L1260 130 L1440 190 L1440 380 L0 380 Z" fill={c2}/>
-            </svg>
-          )})()}
-        </div>
-      </div>
+      <SeasonScenery
+        key={season}
+        season={season}
+        colors={SEASON_CONFIG[season].mtnColors}
+        accent={SEASON_CONFIG[season].accent}
+        highlight={SEASON_CONFIG[season].accentSoft}
+        bodyBg={SEASON_CONFIG[season].bodyBg}
+      />
 
       <div id="season-visual-portal" className="season-visual-mount">
         <SeasonVisualLayer season={season} viewport={viewport} />
@@ -1537,7 +1535,7 @@ function App() {
           {skillGroups.map((group) => (
             <div
               key={group.label}
-              className={`skill-group${group.label === 'Familiar' ? ' skill-group--familiar' : ''}`}
+              className={`skill-group skill-group--${group.id}${group.id === 'familiar' ? ' skill-group--familiar' : ''}`}
             >
               <p className="skill-group-label">{group.label}</p>
               <div className="stack-cloud">
@@ -1694,18 +1692,6 @@ function App() {
           </p>
         </footer>
       </main>
-
-      <div className="peaks-layer peaks-layer--bottom" aria-hidden="true">
-        <div className="mtn-band mtn-band-bottom">
-          {(() => { const [c0, c1, c2] = SEASON_CONFIG[season].mtnColors; return (
-            <svg viewBox="0 0 1440 380" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 270 L160 352 L300 285 L480 362 L640 292 L800 348 L960 280 L1120 358 L1280 295 L1440 335 L1440 0 L0 0 Z" fill={c0}/>
-              <path d="M0 215 L140 302 L280 225 L450 325 L620 232 L790 310 L960 240 L1130 320 L1300 230 L1440 285 L1440 0 L0 0 Z" fill={c1}/>
-              <path d="M0 160 L180 240 L360 170 L540 255 L720 180 L900 245 L1080 175 L1260 250 L1440 190 L1440 0 L0 0 Z" fill={c2}/>
-            </svg>
-          )})()}
-        </div>
-      </div>
 
       {activeDemo && (
         <Suspense fallback={null}>

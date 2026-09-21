@@ -89,47 +89,27 @@
   font-family: var(--font-display);
 }
 
-/* Behind particles (z-0); .page sits above at z-3 */
-.peaks-layer {
-  position: relative;
+/* Cinematic landscape behind particles (z-0); .page sits above at z-3 */
+.season-scenery {
+  position: fixed;
+  inset: 0;
   z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-/* Portal target: fixed overlay between peaks and vignette (body::before z-2) */
+.season-scenery__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 #season-visual-portal.season-visual-mount,
 .season-visual-mount {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 1;
-}
-
-/* Full-width mountain bands that scroll with the page */
-.mtn-band {
-  width: 100%;
-  overflow: hidden;
-  display: block;
-  line-height: 0;
-}
-
-.mtn-band svg {
-  display: block;
-  width: 100%;
-}
-
-.mtn-band svg path {
-  shape-rendering: geometricPrecision;
-  transition: fill 0.8s cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-.mtn-band-top {
-  height: 380px;
-  margin-bottom: -1px;
-}
-
-.mtn-band-bottom {
-  height: 380px;
-  margin-top: -1px;
 }
 
 .skip-link {
@@ -851,12 +831,25 @@ button:focus-visible {
 
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.85rem 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-areas:
+    'lang backend desktop'
+    'tools backend frontend'
+    'familiar familiar familiar';
+  gap: 1rem 1.35rem;
+  align-items: start;
 }
 
+.skill-group--lang { grid-area: lang; }
+.skill-group--backend { grid-area: backend; }
+.skill-group--desktop { grid-area: desktop; }
+.skill-group--frontend { grid-area: frontend; }
+.skill-group--tools { grid-area: tools; }
 .skill-group--familiar {
-  opacity: 0.7;
+  grid-area: familiar;
+  opacity: 0.72;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--border);
 }
 
 .about-grid {
@@ -1136,7 +1129,7 @@ button:focus-visible {
   text-align: center;
   color: var(--text-muted);
   font-size: 0.88rem;
-  padding-bottom: 0.5rem;
+  padding: 1.25rem 0 1.75rem;
 }
 
 .footer a {
@@ -1151,6 +1144,15 @@ button:focus-visible {
 @media (max-width: 980px) {
   .projects-grid {
     grid-template-columns: 1fr;
+  }
+
+  .skills-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'lang desktop'
+      'backend backend'
+      'frontend tools'
+      'familiar familiar';
   }
 
   .about-grid {
@@ -1396,8 +1398,20 @@ button:focus-visible {
 }
 .highlight-list li { font-size: 0.88rem; opacity: 0.82; line-height: 1.4; }
 
+@media (max-width: 560px) {
+  .skills-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'lang'
+      'backend'
+      'desktop'
+      'frontend'
+      'tools'
+      'familiar';
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .mtn-band svg path,
   .card,
   .bg-glow-left,
   .bg-glow-right {
