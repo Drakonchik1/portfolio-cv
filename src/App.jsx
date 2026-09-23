@@ -40,28 +40,31 @@ const SEASON_CONFIG = {
   },
   spring: {
     label: 'Spring',
-    bodyBg: '#060f08',
-    mtnColors: ['#3d8a4a', '#1f5c2c', '#0d2c16', '#060f08'],
-    cardBg: 'rgba(8, 26, 12, 0.72)',
-    sideGlow: 'rgba(180,240,160,0.4)',
-    glowInner: 'rgba(120, 210, 140, 0.22)',
-    glowOuter: 'rgba(170, 235, 160, 0.12)',
-    accent: '#8fe3b0',
-    accentSoft: '#e8f8ef',
-    text: '#eef8f0',
-    textMuted: '#a8c9b8',
+    // Sakura morning: plum ink under a pale sky, so Fuji and blossoms read through the cards
+    bodyBg: '#120e14',
+    sky: '#f6d0de',
+    mtnColors: ['#b7d0ea', '#6d93b8', '#2a3c52', '#120e14'],
+    cardBg: 'rgba(20, 12, 22, 0.68)',
+    sideGlow: 'rgba(255, 190, 206, 0.42)',
+    glowInner: 'rgba(255, 176, 198, 0.24)',
+    glowOuter: 'rgba(255, 196, 210, 0.14)',
+    accent: '#f2a3bc',
+    accentSoft: '#ffe6ef',
+    text: '#fbf4f7',
+    textMuted: '#cbb6c0',
   },
   summer: {
     label: 'Summer',
-    // Dusk over water: cool teal mountains, warm air — reads clearly different from autumn earth tones
-    bodyBg: '#030f14',
-    mtnColors: ['#1a6b7a', '#0f4a58', '#082e38', '#030f14'],
-    cardBg: 'rgba(6, 38, 48, 0.78)',
-    sideGlow: 'rgba(255, 214, 130, 0.38)',
-    glowInner: 'rgba(90, 200, 210, 0.22)',
+    // Hawaiian resort: bright sky, turquoise lagoon, gold sand
+    bodyBg: '#0a1420',
+    sky: '#79c8ee',
+    mtnColors: ['#3dceb8', '#178f88', '#0b4c50', '#06282c'],
+    cardBg: 'rgba(10, 26, 40, 0.78)',
+    sideGlow: 'rgba(255, 214, 130, 0.4)',
+    glowInner: 'rgba(130, 210, 220, 0.22)',
     glowOuter: 'rgba(255, 210, 130, 0.16)',
-    accent: '#f5c66b',
-    accentSoft: '#faf0d8',
+    accent: '#f3c56e',
+    accentSoft: '#fff3d4',
     text: '#fff8ec',
     textMuted: '#c9b896',
   },
@@ -582,20 +585,23 @@ const FLAKE_PATH_D2 = FLAKE_D2.map((s) => `M${s.x1.toFixed(2)} ${s.y1.toFixed(2)
 
 // ─── Seasonal decoration SVGs ─────────────────────────────────────────────────
 // Spring: 5-petal apple blossom
-function AppleBlossomSVG({ size, className, style }) {
-  const cx = 50, cy = 50, off = 19
+function SakuraPetalSVG({ size, className, style }) {
   return (
     <svg className={className} style={{ overflow: 'visible', ...style }} width={size} height={size} viewBox="0 0 100 100">
-      {[0,72,144,216,288].map((deg, i) => {
-        const a = (deg - 90) * Math.PI / 180
-        const px = cx + off * Math.cos(a), py = cy + off * Math.sin(a)
-        return (
-          <ellipse key={i} cx={px} cy={py} rx="9" ry="19"
-            transform={`rotate(${deg},${px},${py})`}
-            fill="rgba(255,215,225,0.88)" stroke="var(--side-glow)" strokeWidth="1.15" strokeOpacity="0.55"/>
-        )
-      })}
-      <circle cx={cx} cy={cy} r="7.5" fill="rgba(255,228,65,0.92)" stroke="rgba(200,158,28,0.55)" strokeWidth="0.9"/>
+      <path
+        d="M50 18 C46 11 40 16 32 30 C20 50 18 68 28 82 C36 94 45 98 50 98 C55 98 64 94 72 82 C82 68 80 50 68 30 C60 16 54 11 50 18 Z"
+        fill="rgba(255,214,226,0.92)"
+        stroke="var(--side-glow)"
+        strokeWidth="1.2"
+        strokeOpacity="0.5"
+      />
+      <path
+        d="M50 30 C50 50 49 72 50 90"
+        fill="none"
+        stroke="rgba(186,92,122,0.4)"
+        strokeWidth="1.35"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }
@@ -644,7 +650,7 @@ function MapleLeafSVG({ size, variant = 0, className, style }) {
 
 function SeasonDecoSVG({ season, size, detail, id = 0, className, style }) {
   switch (season) {
-    case 'spring': return <AppleBlossomSVG size={size} className={className} style={style} />
+    case 'spring': return <SakuraPetalSVG size={size} className={className} style={style} />
     case 'summer': return <SunflowerSVG size={size} className={className} style={style} />
     case 'autumn': return <MapleLeafSVG size={size} variant={id % 3} className={className} style={style} />
     default:       return <KochSnowflakeSVG size={size} detail={detail} className={className} style={style} />
@@ -696,11 +702,11 @@ const SEASON_PLACEMENT = {
     genX: genXEdge,
     genY: (rng, H) => rng() * H,
   },
-  spring: { count: 64, minSz: 12, maxSz: 40, gap: 1.0,
-    genX: genXEdge,
-    genY: (rng, H) => H * (0.04 + Math.pow(rng(), 0.6) * 0.92),
+  spring: { count: 18, minSz: 12, maxSz: 26, gap: 1.45,
+    genX: (rng, W) => (rng() < 0.5 ? rng() * W * 0.14 : W - rng() * W * 0.14),
+    genY: (rng, H) => rng() * H * 0.62,
   },
-  summer: { count: 60, minSz: 20, maxSz: 46, gap: 1.25,
+  summer: { count: 0, minSz: 20, maxSz: 46, gap: 1.25,
     genX: genXEdge,
     genY: (rng, H) => rng() * H * 0.96 + H * 0.02,
   },
@@ -717,6 +723,7 @@ const AMBIENT_ROT_SEED = { winter: 0xa11b001, spring: 0xa11b002, summer: 0xa11b0
 
 function AmbientRotors({ season }) {
   const items = useMemo(() => {
+    if (season === 'spring') return []
     const rng = lcg(AMBIENT_ROT_SEED[season])
     const n = Math.max(1, Math.round(8 * decorDensityScale()))
     return Array.from({ length: n }, (_, i) => ({
@@ -783,7 +790,7 @@ function ParticleField({ season }) {
 
     const particles = []
     // Autumn: many thin streaks; other seasons: fewer, larger motes (−25% vs prior non-autumn bases)
-    const baseCount = season === 'autumn' ? 150 : season === 'winter' ? 71 : 66
+    const baseCount = season === 'autumn' ? 150 : season === 'winter' ? 71 : season === 'spring' ? 34 : 66
     const COUNT = Math.max(1, Math.round(baseCount * decorDensityScale()))
     const isAutumn = season === 'autumn'
 
@@ -830,6 +837,18 @@ function ParticleField({ season }) {
             // streak length along velocity; scales a bit with screen height
             len: (14 + Math.random() * 26) * (1 + Math.min(h, 1200) / 2400),
           })
+        } else if (season === 'spring') {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            size: 2.2 + Math.random() * 2.6,
+            speed: 0.28 + Math.random() * 0.5,
+            drift: (Math.random() - 0.35) * 0.65,
+            rot: Math.random() * Math.PI * 2,
+            rotV: (Math.random() - 0.5) * 0.022,
+            hue: Math.random(),
+            phase: Math.random() * 6.28,
+          })
         } else {
           particles.push({
             x: Math.random() * w,
@@ -873,21 +892,24 @@ function ParticleField({ season }) {
             ctx.restore()
           }
         : season === 'spring'
-          ? (p, t) => {
+          ? (p) => {
               ctx.save()
               ctx.translate(p.x, p.y)
               ctx.rotate(p.rot)
-              const g = Math.floor(150 + p.hue * 80)
-              ctx.fillStyle = `rgba(50,${g},40,0.72)`
+              const pale = p.hue > 0.74
+              const r = pale ? 255 : Math.floor(232 + p.hue * 18)
+              const g = pale ? 220 : Math.floor(156 + p.hue * 36)
+              const b = pale ? 230 : Math.floor(180 + p.hue * 22)
+              const h = p.size * 2.05
+              const w = p.size * 1.05
+              ctx.fillStyle = `rgba(${r},${g},${b},0.78)`
               ctx.beginPath()
-              ctx.ellipse(0, 0, p.size * 0.55, p.size * 2.2, 0, 0, Math.PI * 2)
+              ctx.moveTo(0, -h * 0.62)
+              ctx.quadraticCurveTo(w * 0.35, -h, w * 0.2, -h * 0.15)
+              ctx.quadraticCurveTo(w, h * 0.15, 0, h * 0.72)
+              ctx.quadraticCurveTo(-w, h * 0.15, -w * 0.2, -h * 0.15)
+              ctx.quadraticCurveTo(-w * 0.35, -h, 0, -h * 0.62)
               ctx.fill()
-              ctx.strokeStyle = `rgba(30,${g - 30},20,0.45)`
-              ctx.lineWidth = 0.5
-              ctx.beginPath()
-              ctx.moveTo(0, -p.size * 2.2)
-              ctx.lineTo(0, p.size * 2.2)
-              ctx.stroke()
               ctx.restore()
             }
           : season === 'summer'
@@ -934,7 +956,16 @@ function ParticleField({ season }) {
             if (p.x < -10) p.x = cw + 10
             if (p.x > cw + 10) p.x = -10
           }
-        : (p, t, cw, ch) => {
+        : season === 'spring'
+          ? (p, t, cw, ch) => {
+              p.y += p.speed
+              p.x += p.drift + Math.sin(t * 0.0011 + p.phase) * 0.42
+              p.rot += p.rotV
+              if (p.y > ch + 16) { p.y = -16; p.x = Math.random() * cw }
+              if (p.x < -16) p.x = cw + 16
+              if (p.x > cw + 16) p.x = -16
+            }
+          : (p, t, cw, ch) => {
             p.y += p.speed
             p.x += p.drift
             p.rot += p.rotV
@@ -1008,7 +1039,7 @@ function SideDecorations({ viewport, season }) {
     const cfg   = SEASON_PLACEMENT[season]
     const SEEDS = { winter: 0x5f3759, spring: 0x9a2b1c, summer: 0x4e7f3d, autumn: 0xb3c921 }
     const rng   = lcg(SEEDS[season])
-    const count = Math.max(1, Math.round(cfg.count * decorDensityScale()))
+    const count = cfg.count <= 0 ? 0 : Math.max(1, Math.round(cfg.count * decorDensityScale()))
 
     const placed = []  // { x, y, r }
     const out    = []
@@ -1358,6 +1389,7 @@ function App() {
         accent={SEASON_CONFIG[season].accent}
         highlight={SEASON_CONFIG[season].accentSoft}
         bodyBg={SEASON_CONFIG[season].bodyBg}
+        sky={SEASON_CONFIG[season].sky}
       />
 
       <div id="season-visual-portal" className="season-visual-mount">
